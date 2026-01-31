@@ -3,50 +3,49 @@ description: 初始化專案目錄結構和 AGENTS.md 檔案（Monorepo v3 架�
 ---
 
 ## 🎯 目的
-根據 `docs/monorepo-architecture-v3.md` 建立完整的 monorepo 目錄結構和各層級的 AGENTS.md 規範檔案。
+根據 `docs/tech-stack.md` 的技術棧設定，建立 src/ 內的目錄結構。
 
-## ⚠️ 跨平台支援
-此 workflow 支援 Windows、macOS、Linux。使用 Python 腳本建立目錄和檔案。
+## ⚠️ 重要原則
+- **讀取 docs/tech-stack.md**：根據技術棧決定要建立哪些目錄
+- **只建立 src/ 內的目錄**：非技術目錄由 `/setup-project-info` 建立
+- **不建立 AGENTS.md**：由 `/setup-agents` 負責
+
+## 🔗 執行順序
+此 workflow 是四階段初始化流程的第三階段：
+1. `/setup-project-info` - 建立非技術目錄 ✅
+2. `/setup-techstack` - 設定技術棧 ✅
+3. `/setup-structure` - 建立 src/ 目錄結構 ← 你在這裡
+4. `/setup-agents` - 建立 AGENTS.md
+
+---
 
 ## 📋 執行步驟
 
-### 1. 建立所有目錄結構
+### 1. 讀取技術棧設定
+// turbo
+```bash
+cat docs/tech-stack.md
+```
+
+根據 `docs/tech-stack.md` 的內容，判斷：
+- 是否使用 Python（建立 `__init__.py`、`src/contracts/python/`）
+- 是否使用 TypeScript（建立 `src/contracts/typescript/`）
+- 是否使用 Rust（建立 `src/contracts/rust/`）
+- 前端框架是什麼（調整 `src/apps/web/` 結構）
+
+### 2. 建立 src/ 核心目錄結構
 // turbo
 ```python
 import os
 from pathlib import Path
 
-# 定義所有需要建立的目錄
-directories = [
-    # 私有經營層級
-    "management/strategy",
-    "management/finance",
-    "management/legal",
-    "management/docs",
-    
-    # 產品管理
-    "pm/planning",
-    "pm/discussions",
-    "pm/decisions",
-    "pm/sprints",
-    
-    # 政策規範
-    "policies/foundation",
-    "policies/engineering",
-    "policies/operations",
-    "policies/product",
-    
-    # src/contracts (共享契約)
+# 核心目錄（不論技術棧都需要）
+core_directories = [
+    # src/contracts (共享契約) - 基礎目錄
     "src/contracts/schemas",
     "src/contracts/enums",
     "src/contracts/errors",
     "src/contracts/i18n",
-    "src/contracts/python/dto",
-    "src/contracts/python/interfaces",
-    "src/contracts/typescript/dto",
-    "src/contracts/typescript/interfaces",
-    "src/contracts/rust/dto",
-    "src/contracts/rust/interfaces",
     
     # src/core (DDD 三層)
     "src/core/domain/entities",
@@ -59,167 +58,207 @@ directories = [
     "src/core/infrastructure/mocks",
     "src/core/application/services",
     
-    # src/apps (介面層)
-    "src/apps/backend/routes",
-    "src/apps/web/src/pages",
-    "src/apps/web/src/components",
-    "src/apps/web/src/services",
-    "src/apps/web/src/mocks",
-    "src/apps/cli",
-    "src/apps/desktop",
-    
-    # 企業版
-    "enterprise/packages",
-    "enterprise/branding",
-    
-    # 其他
-    "tools",
-    "scripts",
-    "logs",
-    "out",
-    "discussions",
-    "docs",
-    ".windsurf/rules",
-    ".windsurf/workflows",
-    ".windsurf/skills",
-    ".windsurf/templates",
+    # src/apps (介面層) - 基礎目錄
+    "src/apps",
 ]
 
-for d in directories:
+for d in core_directories:
     Path(d).mkdir(parents=True, exist_ok=True)
     print(f"✅ {d}")
 
-print("\n📁 目錄結構建立完成")
+print("\n📁 核心目錄結構建立完成")
 ```
 
-### 2. 建立 Python __init__.py 檔案
+### 3. 根據技術棧建立語言相關目錄
+
+**如果使用 Python：**
 // turbo
 ```python
 from pathlib import Path
 
-# Python 模組需要 __init__.py
-init_files = [
-    "src/contracts/__init__.py",
-    "src/contracts/python/__init__.py",
-    "src/contracts/python/dto/__init__.py",
-    "src/contracts/python/interfaces/__init__.py",
-    "src/core/__init__.py",
-    "src/core/domain/__init__.py",
-    "src/core/domain/entities/__init__.py",
-    "src/core/domain/use-cases/__init__.py",
-    "src/core/domain/services/__init__.py",
-    "src/core/infrastructure/__init__.py",
-    "src/core/infrastructure/repositories/__init__.py",
-    "src/core/infrastructure/mocks/__init__.py",
-    "src/core/application/__init__.py",
-    "src/core/application/services/__init__.py",
-    "src/apps/__init__.py",
-    "src/apps/backend/__init__.py",
-    "src/apps/backend/routes/__init__.py",
+# 讀取 tech-stack.md 判斷是否使用 Python
+tech_stack = Path("docs/tech-stack.md").read_text(encoding="utf-8")
+
+if "Python" in tech_stack or "python" in tech_stack:
+    python_dirs = [
+        "src/contracts/python/dto",
+        "src/contracts/python/interfaces",
+        "src/apps/backend/routes",
+    ]
+    
+    for d in python_dirs:
+        Path(d).mkdir(parents=True, exist_ok=True)
+        print(f"✅ {d}")
+    
+    # 建立 __init__.py
+    init_files = [
+        "src/contracts/__init__.py",
+        "src/contracts/python/__init__.py",
+        "src/contracts/python/dto/__init__.py",
+        "src/contracts/python/interfaces/__init__.py",
+        "src/core/__init__.py",
+        "src/core/domain/__init__.py",
+        "src/core/domain/entities/__init__.py",
+        "src/core/domain/use-cases/__init__.py",
+        "src/core/domain/services/__init__.py",
+        "src/core/infrastructure/__init__.py",
+        "src/core/infrastructure/repositories/__init__.py",
+        "src/core/infrastructure/mocks/__init__.py",
+        "src/core/application/__init__.py",
+        "src/core/application/services/__init__.py",
+        "src/apps/__init__.py",
+        "src/apps/backend/__init__.py",
+        "src/apps/backend/routes/__init__.py",
+    ]
+    
+    for f in init_files:
+        path = Path(f)
+        if not path.exists():
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.touch()
+            print(f"✅ {f}")
+    
+    print("\n🐍 Python 目錄和 __init__.py 建立完成")
+else:
+    print("⏭️ 不使用 Python，跳過 Python 目錄")
+```
+
+**如果使用 TypeScript：**
+// turbo
+```python
+from pathlib import Path
+
+tech_stack = Path("docs/tech-stack.md").read_text(encoding="utf-8")
+
+if "TypeScript" in tech_stack or "Node.js" in tech_stack or "React" in tech_stack or "Vue" in tech_stack:
+    ts_dirs = [
+        "src/contracts/typescript/dto",
+        "src/contracts/typescript/interfaces",
+    ]
+    
+    for d in ts_dirs:
+        Path(d).mkdir(parents=True, exist_ok=True)
+        print(f"✅ {d}")
+    
+    print("\n📦 TypeScript 目錄建立完成")
+else:
+    print("⏭️ 不使用 TypeScript，跳過 TypeScript 目錄")
+```
+
+**如果使用 Rust：**
+// turbo
+```python
+from pathlib import Path
+
+tech_stack = Path("docs/tech-stack.md").read_text(encoding="utf-8")
+
+if "Rust" in tech_stack and "無" not in tech_stack.split("Rust")[1][:50]:
+    rust_dirs = [
+        "src/contracts/rust/dto",
+        "src/contracts/rust/interfaces",
+    ]
+    
+    for d in rust_dirs:
+        Path(d).mkdir(parents=True, exist_ok=True)
+        print(f"✅ {d}")
+    
+    print("\n🦀 Rust 目錄建立完成")
+else:
+    print("⏭️ 不使用 Rust，跳過 Rust 目錄")
+```
+
+### 4. 根據前端框架建立 web 目錄
+
+**讀取前端框架設定並建立對應結構：**
+// turbo
+```python
+from pathlib import Path
+
+tech_stack = Path("docs/tech-stack.md").read_text(encoding="utf-8")
+
+# 判斷前端框架
+if "Astro" in tech_stack:
+    # Astro + React 結構
+    web_dirs = [
+        "src/apps/web/src/pages",
+        "src/apps/web/src/components",
+        "src/apps/web/src/layouts",
+        "src/apps/web/src/services",
+        "src/apps/web/src/mocks",
+        "src/apps/web/src/stores",
+        "src/apps/web/public",
+    ]
+    print("🚀 使用 Astro 結構")
+elif "Vue" in tech_stack:
+    # Vue 結構
+    web_dirs = [
+        "src/apps/web/src/pages",
+        "src/apps/web/src/components",
+        "src/apps/web/src/services",
+        "src/apps/web/src/mocks",
+        "src/apps/web/src/stores",
+        "src/apps/web/src/types",
+        "src/apps/web/public",
+    ]
+    print("💚 使用 Vue 結構")
+elif "React" in tech_stack:
+    # React 結構（純 React，非 Astro）
+    web_dirs = [
+        "src/apps/web/src/pages",
+        "src/apps/web/src/components",
+        "src/apps/web/src/hooks",
+        "src/apps/web/src/services",
+        "src/apps/web/src/mocks",
+        "src/apps/web/src/stores",
+        "src/apps/web/public",
+    ]
+    print("⚛️ 使用 React 結構")
+else:
+    # 預設結構
+    web_dirs = [
+        "src/apps/web/src/pages",
+        "src/apps/web/src/components",
+        "src/apps/web/src/services",
+        "src/apps/web/public",
+    ]
+    print("📁 使用預設 Web 結構")
+
+for d in web_dirs:
+    Path(d).mkdir(parents=True, exist_ok=True)
+    print(f"✅ {d}")
+
+print("\n🌐 Web 目錄建立完成")
+```
+
+### 5. 建立其他 apps 目錄（可選）
+// turbo
+```python
+from pathlib import Path
+
+# CLI 和 Desktop 目錄（如果需要）
+optional_dirs = [
+    "src/apps/cli",
+    "src/apps/desktop",
 ]
 
-for f in init_files:
-    path = Path(f)
-    if not path.exists():
-        path.touch()
-        print(f"✅ {f}")
-    else:
-        print(f"⏭️ {f} (已存在)")
+for d in optional_dirs:
+    Path(d).mkdir(parents=True, exist_ok=True)
+    print(f"✅ {d}")
 
-print("\n🐍 Python __init__.py 建立完成")
+print("\n📱 其他 apps 目錄建立完成")
 ```
 
-### 3. 建立 AGENTS.md 檔案
-以下 AGENTS.md 檔案需要建立（若不存在）：
-
-#### 3.1 根目錄 AGENTS.md
-建立 `/AGENTS.md`，包含：
-- 專案概述（一人公司完整 monorepo）
-- 目錄結構規範（參考 docs/monorepo-architecture-v3.md）
-- 核心開發原則（DDD、OOP、TDD）
-- 命名規範（kebab-case 目錄、snake_case Python、camelCase TypeScript）
-- 開發流程（/build-ui → /build-contract → /build-backend）
-- 敏感資訊處理（.env）
-
-#### 3.2 src/AGENTS.md
-建立 `src/AGENTS.md`，包含：
-- 程式碼層概述
-- 目錄結構說明
-- 依賴方向規則
-- 多語言支援說明
-
-#### 3.3 src/contracts/AGENTS.md
-建立 `src/contracts/AGENTS.md`，包含：
-- 共享契約層職責
-- JSON Schema 規範
-- DTO 命名規範（Request/Response 後綴）
-- Protocol/Interface 定義規範
-- 多語言 DTO 同步規則
-
-#### 3.4 src/core/AGENTS.md
-建立 `src/core/AGENTS.md`，包含：
-- DDD 三層架構說明
-- 依賴方向（domain ← infrastructure ← application）
-- 各層職責
-- 測試規範（*.unit.py 同目錄）
-- 預設單一語言，需要時再分語言子目錄
-
-#### 3.5 src/apps/AGENTS.md
-建立 `src/apps/AGENTS.md`，包含：
-- 介面層職責（API、Web、CLI、Desktop）
-- 各 app 獨立依賴管理
-- 路由規範
-- 環境變數使用
-
-#### 3.6 src/apps/backend/AGENTS.md
-建立 `src/apps/backend/AGENTS.md`，包含：
-- Backend API 規範
-- FastAPI 路由結構
-- 依賴注入
-- Mock 切換機制
-- TDD 流程
-
-#### 3.7 src/apps/web/AGENTS.md
-建立 `src/apps/web/AGENTS.md`，包含：
-- Frontend 規範
-- 組件結構（pages、components、services）
-- 假資料管理（mocks/）
-- API 服務呼叫
-- 樣式規範
-
-#### 3.8 pm/AGENTS.md
-建立 `pm/AGENTS.md`，包含：
-- 產品管理規範
-- planning/ 目錄用途（01_backlog, 02_active, 03_completed）
-- discussions/ 命名規範（DISC-YYYYMMDDHHMM-Subject.md）
-- decisions/ 命名規範（DEC-XXX-Subject.md）
-
-#### 3.9 policies/AGENTS.md
-建立 `policies/AGENTS.md`，包含：
-- 政策文件規範
-- 版本資訊要求
-- 修訂歷史格式
-- 各子目錄用途
-
-### 12. 驗證結構
+### 6. 驗證結構
 // turbo
 ```python
-import os
 from pathlib import Path
 
-# 驗證關鍵目錄是否存在
 key_dirs = [
-    "management",
-    "pm/planning",
-    "policies",
     "src/contracts",
     "src/core/domain",
     "src/core/infrastructure",
     "src/core/application",
-    "src/apps/backend",
-    "src/apps/web",
-    "enterprise",
-    ".windsurf",
+    "src/apps",
 ]
 
 print("🔍 驗證目錄結構...")
@@ -237,56 +276,30 @@ else:
     print("\n⚠️ 部分目錄未建立，請檢查")
 ```
 
-### 13. 顯示完成訊息
+### 7. 顯示完成訊息
 執行完成後，輸出以下訊息：
 ```
-✅ Monorepo v3 結構初始化完成！
+✅ src/ 目錄結構建立完成！
 
-已建立的目錄層級：
-📁 私有層級
-  - management/ (經營管理)
-  - pm/ (產品管理)
-  - policies/ (公司規定)
-  - enterprise/ (企業版)
-
-📁 程式碼層級 (src/)
-  - contracts/ (共享契約)
-  - core/ (DDD 三層：domain, infrastructure, application)
-  - apps/ (介面層：backend, web, cli, desktop)
-
-📁 其他
-  - tools/, scripts/, logs/, out/
-  - .windsurf/ (配置)
-
-已建立的 AGENTS.md：
-  - /AGENTS.md (全域規範)
-  - src/AGENTS.md (程式碼層)
-  - src/contracts/AGENTS.md (契約層)
-  - src/core/AGENTS.md (DDD 核心)
-  - src/apps/AGENTS.md (介面層)
-  - src/apps/backend/AGENTS.md (Backend)
-  - src/apps/web/AGENTS.md (Frontend)
-  - pm/AGENTS.md (產品管理)
-  - policies/AGENTS.md (政策文件)
+已建立的目錄：
+📁 contracts/ - 共享契約
+📁 core/ - DDD 三層（domain, infrastructure, application）
+📁 apps/ - 介面層（backend, web, cli, desktop）
 
 下一步：
-  - 執行 `make install` 安裝依賴
-  - 執行 `make dev` 啟動開發環境
-  - 使用 `/build-ui` 開始 UI 開發
+  - 執行 `/setup-agents` 建立 AGENTS.md
 ```
 
 ## 📝 注意事項
 
 1. 此 workflow 是冪等的（可重複執行）
 2. 已存在的檔案不會被覆蓋
-3. 只建立缺失的目錄和檔案
-4. 建立後請檢查 AGENTS.md 內容是否符合專案需求
-5. 參考 `docs/monorepo-architecture-v3.md` 了解完整架構設計
+3. 目錄結構會根據 `docs/tech-stack.md` 動態調整
+4. 如果 `docs/tech-stack.md` 不存在，請先執行 `/setup-techstack`
 
 ## 🔧 故障排除
 
 如果執行失敗：
-1. 檢查是否在專案根目錄執行
-2. 確認有足夠的檔案系統權限
-3. 檢查是否有檔案名稱衝突
-4. 查看錯誤訊息並手動建立缺失的目錄
+1. 確認 `docs/tech-stack.md` 存在
+2. 檢查是否在專案根目錄執行
+3. 確認有足夠的檔案系統權限

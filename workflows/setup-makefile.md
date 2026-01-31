@@ -21,7 +21,7 @@ description: 建立或更新 Makefile，包含虛擬環境管理
 
 #### 變數定義
 ```makefile
-VENV_DIR = backend/venv
+VENV_DIR = .venv
 PYTHON = $(VENV_DIR)/bin/python
 PIP = $(VENV_DIR)/bin/pip
 UVICORN = $(VENV_DIR)/bin/uvicorn
@@ -93,10 +93,10 @@ clean: backend-clean
 ### 4. 建立 .gitignore 條目
 確保 `.gitignore` 包含：
 ```
-backend/venv/
-backend/__pycache__/
-backend/**/__pycache__/
-backend/**/*.pyc
+.venv/
+src/apps/backend/__pycache__/
+src/apps/backend/**/__pycache__/
+src/apps/backend/**/*.pyc
 ```
 
 ### 5. 測試 Makefile
@@ -112,7 +112,7 @@ make venv-info
 ✅ Makefile 已建立！
 
 虛擬環境管理：
-- 虛擬環境位置: backend/venv/
+- 虛擬環境位置: .venv/
 - 自動建立: 執行 make install 或 make backend-install 時自動建立
 - 手動建立: make backend-venv
 
@@ -134,7 +134,7 @@ make venv-info
    make venv-info
 
 注意事項：
-- 虛擬環境會自動建立在 backend/venv/
+- 虛擬環境會自動建立在 .venv/
 - 所有 Python 指令都會使用虛擬環境
 - 不需要手動 activate venv
 - 虛擬環境已加入 .gitignore
@@ -146,7 +146,7 @@ make venv-info
 
 ```makefile
 # 變數定義
-VENV_DIR = backend/venv
+VENV_DIR = .venv
 PYTHON = $(VENV_DIR)/bin/python
 PIP = $(VENV_DIR)/bin/pip
 UVICORN = $(VENV_DIR)/bin/uvicorn
@@ -190,8 +190,8 @@ dev: backend-install frontend-install
 	@echo "API Docs: http://localhost:8000/docs"
 	@echo ""
 	@trap 'kill 0' EXIT; \
-	(cd backend && ../$(UVICORN) app.main:app --reload --host 0.0.0.0 --port 8000) & \
-	(cd frontend && npm run dev)
+	(cd src/apps/backend && $(UVICORN) main:app --reload --host 0.0.0.0 --port 8000) & \
+	(cd src/apps/web && npm run dev)
 
 # 安裝所有依賴
 install: frontend-install backend-install
@@ -235,27 +235,27 @@ backend-venv: $(VENV_DIR)
 backend-install: $(VENV_DIR)
 	@echo "Installing backend dependencies in virtual environment..."
 	$(PIP) install --upgrade pip
-	$(PIP) install -r backend/requirements.txt
+	$(PIP) install -r src/apps/backend/requirements.txt
 	@echo "✓ Backend dependencies installed!"
 
 backend-dev: $(VENV_DIR)
 	@echo "Starting backend development server..."
 	@echo "Backend:  http://localhost:8000"
 	@echo "API Docs: http://localhost:8000/docs"
-	@test -f backend/app/main.py || { echo "Error: backend/app/main.py not found"; exit 1; }
-	cd backend && ../$(UVICORN) app.main:app --reload --host 0.0.0.0 --port 8000
+	@test -f src/apps/backend/main.py || { echo "Error: src/apps/backend/main.py not found"; exit 1; }
+	cd src/apps/backend && $(UVICORN) main:app --reload --host 0.0.0.0 --port 8000
 
 backend-clean:
 	@echo "Cleaning backend cache and artifacts..."
-	find backend -type d -name "__pycache__" -exec rm -rf {} + 2>/dev/null || true
-	find backend -type f -name "*.pyc" -delete 2>/dev/null || true
+	find src/apps/backend -type d -name "__pycache__" -exec rm -rf {} + 2>/dev/null || true
+	find src/apps/backend -type f -name "*.pyc" -delete 2>/dev/null || true
 	@echo "✓ Backend clean complete!"
 
 # 清理所有
 clean: backend-clean
 	@echo "Cleaning all build artifacts and dependencies..."
-	rm -rf frontend/node_modules
-	rm -rf frontend/dist
+	rm -rf src/apps/web/node_modules
+	rm -rf src/apps/web/dist
 	rm -rf $(VENV_DIR)
 	@echo "✓ Clean complete!"
 ```

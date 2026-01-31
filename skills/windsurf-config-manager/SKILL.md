@@ -1,6 +1,18 @@
 ---
 name: windsurf-config-manager
-description: Comprehensive guide for creating, modifying, and managing Windsurf configuration files including Skills, Rules, Workflows, and AGENTS.md. Use when the user wants to create or modify any Windsurf configuration (.windsurf/skills/, .windsurf/rules/, .windsurf/workflows/, or AGENTS.md files), or needs guidance on which configuration type to use for their needs.
+description: |
+  Comprehensive guide for creating, modifying, and managing Windsurf configuration files.
+  
+  **TRIGGER THIS SKILL WHEN:**
+  - User asks about Rules vs Skills vs Workflows vs AGENTS.md
+  - User wants to create or modify .windsurf/skills/, .windsurf/rules/, .windsurf/workflows/
+  - User asks "where should I put this rule/config?"
+  - User asks about trigger modes (always_on, model_decision, glob, manual)
+  - User wants to set coding standards, file size limits, or behavioral guidelines
+  - User asks which configuration type to use for their needs
+  - User mentions: Rule, Skill, Workflow, AGENTS.md, trigger, glob pattern
+  
+  **DO NOT USE FOR:** General coding questions unrelated to Windsurf configuration.
 ---
 
 # Windsurf Configuration Manager
