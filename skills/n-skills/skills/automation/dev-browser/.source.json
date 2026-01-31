@@ -1,0 +1,13 @@
+{
+  "synced_from": "SawyerHood/dev-browser",
+  "source_path": "skills/dev-browser",
+  "commit": "66682fb0513aec308e68d71740e2b0394a29d884",
+  "content_hash": "9baddfa1dd72bf063e5172ebdf581986fc91289b9771836721e1a0ece0bd3da9",
+  "synced_at": "2026-01-06T00:21:08.868Z",
+  "homepage": "https://github.com/SawyerHood/dev-browser",
+  "author": {
+    "name": "Sawyer Hood",
+    "github": "SawyerHood"
+  },
+  "license": "MIT"
+}
