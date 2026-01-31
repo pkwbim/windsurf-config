@@ -6,7 +6,7 @@ description: 設定專案技術棧 - 詢問並更新所有 AGENTS.md 檔案中�
 透過 `/discussion` 流程，收集專案的技術棧選擇，並記錄到 `docs/tech-stack.md`。
 
 ## ⚠️ 重要原則
-- **使用 /discussion 流程**：所有詢問都透過討論檔案進行
+- **使用 /discussion 流程**：透過單一討論檔案收集所有技術棧資訊
 - **必須停下來等待**：產生討論檔案後，必須等待使用者回覆
 - **只記錄到 docs/tech-stack.md**：不更新 AGENTS.md（由 `/setup-agents` 負責）
 
@@ -21,7 +21,7 @@ description: 設定專案技術棧 - 詢問並更新所有 AGENTS.md 檔案中�
 
 ## 📋 執行步驟
 
-### 1. 建立技術棧選擇討論檔案
+### 1. 建立技術棧討論檔案
 
 在 `discussions/` 資料夾建立討論檔案：
 
@@ -37,21 +37,21 @@ discussions/DISC-YYYYMMDD-HHMM-TechStackSetup.md
 ## 📋 背景說明
 設定專案使用的技術棧，這些資訊將會記錄到 `docs/tech-stack.md`。
 
-## ❓ 問題
+---
 
-### 問題 1：選擇設定方式
+## ❓ 問題 1：選擇設定方式
 
 **[P] 使用 Preset（推薦）**
-快速選擇預設組合，可微調細節
+快速選擇預設組合，可在下方微調
 
 **[C] 自訂**
-從頭填寫技術棧問卷
+跳過 Preset，直接填寫下方所有問題
 
 答：
 
 ---
 
-### 問題 2：選擇 Preset（如果問題 1 選 P）
+## ❓ 問題 2：選擇 Preset（如果問題 1 選 P）
 
 | # | Preset 名稱 | 後端 | 前端 |
 |---|------------|------|------|
@@ -67,6 +67,51 @@ discussions/DISC-YYYYMMDD-HHMM-TechStackSetup.md
 
 ---
 
+## 📝 技術棧詳細設定
+
+> **如果選了 Preset：** 以下已填入預設值，只需修改想調整的項目
+> **如果選自訂：** 請填寫所有項目
+
+### 🐍 後端 (Backend)
+
+| 項目 | 預設值 (Preset 1) | 您的選擇 |
+|------|------------------|----------|
+| Python 版本 | 3.10 | |
+| Web 框架 | FastAPI | |
+| ORM | SQLAlchemy | |
+| 資料庫 | SQLite | |
+| 測試框架 | pytest | |
+
+> 如果不使用後端，請填「無」
+
+### 🖥️ 前端 (Frontend)
+
+| 項目 | 預設值 (Preset 1) | 您的選擇 |
+|------|------------------|----------|
+| Node.js 版本 | 22 | |
+| 套件管理器 | npm | |
+| 框架 | Vue 3 | |
+| 狀態管理 | Pinia | |
+| UI 框架 | shadcn-vue | |
+| 建置工具 | Vite | |
+| 測試框架 | Vitest | |
+| E2E 測試 | Playwright | |
+
+> 如果不使用前端，請填「無」
+
+### 🛠️ 開發工具
+
+| 項目 | 預設值 | 您的選擇 |
+|------|--------|----------|
+| 格式化 (前端) | Prettier | |
+| 格式化 (後端) | Ruff | |
+| Linter (前端) | ESLint | |
+| Linter (後端) | Ruff | |
+| CI/CD | GitHub Actions | |
+| 容器化 | Docker | |
+
+---
+
 ## ⏳ 狀態
 - [ ] 等待回答
 - [ ] 已回答，待處理
@@ -79,7 +124,12 @@ discussions/DISC-YYYYMMDD-HHMM-TechStackSetup.md
 ```
 我已建立技術棧討論檔案：`discussions/DISC-YYYYMMDD-HHMM-TechStackSetup.md`
 
-請在檔案中回答問題。完成後，請告訴我「我已回答」。
+請在檔案中回答問題：
+1. 選擇 Preset 或自訂
+2. 如果選 Preset，填入數字
+3. 在表格中填入「您的選擇」欄位（只需填想修改的項目）
+
+完成後，請告訴我「我已回答」。
 
 ⚠️ 在您回答之前，我不會執行任何動作。
 ```
@@ -90,19 +140,18 @@ discussions/DISC-YYYYMMDD-HHMM-TechStackSetup.md
 - 使用者會說「我已回答」或類似的話
 - **只有在使用者明確表示已回答後，才繼續下一步**
 
-### 4. 讀取並判斷流程
+### 4. 讀取並處理結果
 
 讀取討論檔案，根據使用者的選擇：
-- **如果選 P（Preset）**：繼續 Preset 流程
-- **如果選 C（自訂）**：繼續自訂流程
+
+1. **判斷 Preset 或自訂**
+2. **載入 Preset 預設值（如適用）**
+3. **套用使用者的修改**
+4. **顯示最終配置摘要，請使用者確認**
 
 ---
 
-## 🅿️ Preset 流程
-
-### P-1. 載入 Preset 預設值
-
-根據使用者選擇的數字，載入對應的預設值：
+## 📦 Preset 預設值參考
 
 **Preset 1: fullstack-python-vue**
 ```yaml
@@ -217,276 +266,6 @@ tools:
   container: "Docker"
 ```
 
-### P-2. 建立微調討論檔案
-
-建立新的討論檔案詢問是否需要微調：
-
-**檔案命名格式：**
-```
-discussions/DISC-YYYYMMDD-HHMM-TechStackSetup-Adjust.md
-```
-
-**檔案內容：**
-```markdown
-# 討論主題：技術棧微調
-
-## 📋 背景說明
-您選擇了 Preset: {preset_name}
-
-## 📦 預設配置
-
-### 後端 (Backend)
-| 項目 | 預設值 |
-|------|--------|
-| Python 版本 | {python_version} |
-| Web 框架 | {web_framework} |
-| ORM | {orm} |
-| 資料庫 | {database} |
-| 測試框架 | {test_framework} |
-
-### 前端 (Frontend)
-| 項目 | 預設值 |
-|------|--------|
-| Node.js 版本 | {node_version} |
-| 套件管理器 | {package_manager} |
-| 框架 | {framework} |
-| 狀態管理 | {state_management} |
-| UI 框架 | {ui_framework} |
-| 建置工具 | {build_tool} |
-| 測試框架 | {test_framework} |
-| E2E 測試 | {e2e_test} |
-
-### 開發工具
-| 項目 | 預設值 |
-|------|--------|
-| 格式化 (前端) | {formatter_frontend} |
-| 格式化 (後端) | {formatter_backend} |
-| Linter (前端) | {linter_frontend} |
-| Linter (後端) | {linter_backend} |
-| CI/CD | {ci_cd} |
-| 容器化 | {container} |
-
-## ❓ 問題
-
-### 問題 1：是否需要微調？
-
-- **[Y]** 是，我要調整一些項目
-- **[N]** 不用，直接使用這些設定
-
-答：
-
----
-
-### 問題 2：要調整哪些項目？（如果問題 1 選 Y）
-
-請列出要調整的項目和新值，格式：
-```
-項目名稱: 新值
-```
-
-例如：
-```
-Python 版本: 3.12
-資料庫: PostgreSQL
-```
-
-答：
-
----
-
-## ⏳ 狀態
-- [ ] 等待回答
-- [ ] 已回答，待處理
-```
-
-### P-3. 通知使用者並停止
-
-告訴使用者：
-
-```
-我已建立微調討論檔案：`discussions/DISC-YYYYMMDD-HHMM-TechStackSetup-Adjust.md`
-
-請在檔案中回答問題。完成後，請告訴我「我已回答」。
-
-⚠️ 在您回答之前，我不會執行任何動作。
-```
-
-**然後完全停止，等待使用者回覆。**
-
-### P-4. 讀取微調結果
-
-使用者說「我已回答」後，讀取討論檔案並套用微調。
-
----
-
-## 🔧 自訂流程
-
-### C-1. 建立完整技術棧問卷
-
-建立新的討論檔案：
-
-**檔案命名格式：**
-```
-discussions/DISC-YYYYMMDD-HHMM-TechStackSetup-Custom.md
-```
-
-**檔案內容：**
-```markdown
-# 討論主題：專案技術棧設定（自訂）
-
-## 📋 背景說明
-設定專案使用的技術棧，這些資訊將會記錄到 `docs/tech-stack.md`。
-
-## ❓ 技術棧問卷
-
-### 🐍 Python 相關
-
-**問題 1：Python 版本**
-例：3.10、3.11、3.12、3.13
-
-答：
-
----
-
-**問題 2：Web 框架**
-例：FastAPI、Django、Flask、無
-
-答：
-
----
-
-**問題 3：ORM**
-例：SQLAlchemy、Tortoise ORM、無
-
-答：
-
----
-
-**問題 4：資料庫**
-例：PostgreSQL、MySQL、SQLite、MongoDB
-
-答：
-
----
-
-**問題 5：測試框架**
-例：pytest、unittest
-
-答：
-
----
-
-### 📦 TypeScript/Node.js 相關
-
-**問題 6：Node.js 版本**
-例：20、22
-
-答：
-
----
-
-**問題 7：套件管理器**
-例：npm、pnpm、yarn、bun
-
-答：
-
----
-
-### 🖥️ 前端框架
-
-**問題 8：前端框架**
-例：Vue 3、React 19、Astro + React、無
-
-答：
-
----
-
-**問題 9：狀態管理**
-例：Pinia (Vue)、Zustand (React)、無
-
-答：
-
----
-
-**問題 10：UI 框架**
-例：shadcn/ui、shadcn-vue、Element Plus、Vuetify、無
-
-答：
-
----
-
-**問題 11：建置工具**
-例：Vite、Astro、無
-
-答：
-
----
-
-**問題 12：前端測試框架**
-例：Vitest、Jest、無
-
-答：
-
----
-
-**問題 13：E2E 測試**
-例：Playwright、Cypress、無
-
-答：
-
----
-
-### 🛠️ 開發工具
-
-**問題 14：程式碼格式化**
-例：Prettier (前端)、Ruff (後端)
-
-答：
-
----
-
-**問題 15：Linter**
-例：ESLint (前端)、Ruff (後端)
-
-答：
-
----
-
-**問題 16：CI/CD**
-例：GitHub Actions、GitLab CI、無
-
-答：
-
----
-
-**問題 17：容器化**
-例：Docker、無
-
-答：
-
----
-
-## ⏳ 狀態
-- [ ] 等待回答
-- [ ] 已回答，待處理
-```
-
-### C-2. 通知使用者並停止
-
-```
-我已建立技術棧問卷：`discussions/DISC-YYYYMMDD-HHMM-TechStackSetup-Custom.md`
-
-請在檔案中回答所有問題。完成後，請告訴我「我已回答」。
-
-⚠️ 在您回答之前，我不會執行任何動作。
-```
-
-**然後完全停止，等待使用者回覆。**
-
-### C-3. 讀取並確認
-
-使用者說「我已回答」後，讀取討論檔案並顯示摘要，請使用者確認。
-
 ---
 
 ## 📝 寫入 docs/tech-stack.md
@@ -551,6 +330,6 @@ discussions/DISC-YYYYMMDD-HHMM-TechStackSetup-Custom.md
 
 1. 此 workflow 只更新 `docs/tech-stack.md`
 2. 不會更新 AGENTS.md（由 `/setup-agents` 負責）
-3. 所有詢問都透過 `/discussion` 檔案進行
+3. 只需一張問卷，一次完成所有設定
 4. 可以重複執行此 workflow 來更新技術棧
 5. Preset 詳細比較請參考 `docs/techstack-presets-comparison.md`
