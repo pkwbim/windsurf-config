@@ -20,30 +20,30 @@ description: 階段 1 - 純 UI 開發（不接 API，使用假資料）
 // turbo
 ```bash
 git branch --show-current
-cat _planning/02_active.md
+cat pm/planning/02_active.md
 ```
 - 確認已在 feature 分支
-- 確認規格已在 `02_active.md`
+- 確認規格已在 `pm/planning/02_active.md`
 - 確認此 Story 需要前端 UI（若純 Backend 功能，請改用 `/build-backend`）
 
-**⚠️ 重要：必須完整閱讀 `02_active.md` 的規格內容，理解：**
+**⚠️ 重要：必須完整閱讀 `pm/planning/02_active.md` 的規格內容，理解：**
 - User Story 和驗收標準
 - Domain Analysis 中的 Entity 和 Use Case
 - Technical Requirements 中的 Frontend 需求
 - Testing Criteria 中的測試項目
 
 ### 1. 分析 UI 需求（必須引用規格）
-**⚠️ 強制要求：在開始實作前，必須明確列出以下內容（引用 `02_active.md`）：**
+**⚠️ 強制要求：在開始實作前，必須明確列出以下內容（引用 `pm/planning/02_active.md`）：**
 
 ```markdown
 ## 規格引用
-### 來自 02_active.md 的 User Story
+### 來自 pm/planning/02_active.md 的 User Story
 > [複製 User Story 內容]
 
-### 來自 02_active.md 的 Frontend 需求
+### 來自 pm/planning/02_active.md 的 Frontend 需求
 > [複製 Technical Requirements > Frontend 內容]
 
-### 來自 02_active.md 的驗收標準（UI 相關）
+### 來自 pm/planning/02_active.md 的驗收標準（UI 相關）
 > [複製相關驗收標準]
 ```
 
@@ -55,45 +55,103 @@ cat _planning/02_active.md
 **若規格不清楚，觸發 CLARIFICATION PROTOCOL，不要自行假設。**
 
 ### 2. 建立組件與假資料
-**Vue 3 組件開發原則：**
-- 使用 `<script setup>` 語法
-- 使用 Composition API
-- 假資料直接寫在組件內或 composable 中
+**React + TypeScript 組件開發原則：**
+- 使用函數式組件 (Function Components)
+- 使用 React Hooks (useState, useEffect 等)
+- 假資料集中管理在 `src/apps/web/src/mocks/{story-id}/components/`
 
-**假資料範例：**
-```javascript
-// 在組件內直接定義假資料
-const mockData = ref([
-  { id: 1, name: '測試項目 1', status: 'active' },
-  { id: 2, name: '測試項目 2', status: 'pending' },
-])
+**❗ 重要：假資料必須建立獨立檔案**
+
+為了讓下一步 `/build-contract` 知道要提供哪些 API，每個組件的假資料必須建立專屬的 `.mock.ts` 檔案。
+
+**假資料檔案結構：**
+```
+src/apps/web/src/mocks/
+└── {story-id}/
+    └── components/
+        ├── ComponentA.mock.ts
+        └── ComponentB.mock.ts
 ```
 
-**檔案結構：**
+**假資料檔案範例：**
+```typescript
+// src/apps/web/src/mocks/story-0018/components/UserList.mock.ts
+
+/** 使用者資料 */
+export interface User {
+  /** 使用者 ID */
+  id: number
+  /** 顯示名稱 */
+  name: string
+  /** 狀態：active=啟用, inactive=停用 */
+  status: 'active' | 'inactive'
+  /** 頭像 URL（可選） */
+  avatar?: string
+}
+
+/** 使用者列表 API 回應 */
+export interface UserListResponse {
+  users: User[]
+  total: number
+  page: number
+}
+
+/** 假資料 */
+export const mockUserList: UserListResponse = {
+  users: [
+    { id: 1, name: '王小明', status: 'active', avatar: '/img/user1.png' },
+    { id: 2, name: '李小華', status: 'inactive' },
+  ],
+  total: 100,
+  page: 1,
+}
+
+/**
+ * UI 互動說明：
+ * - 點擊列表項目 → 開啟使用者詳情
+ * - status 顯示為彩色標籤（active=綠色, inactive=灰色）
+ * - 支援分頁，每頁 20 筆
+ * 
+ * 預期 API：
+ * - GET /api/users?page={page} → 取得使用者列表
+ */
 ```
-frontend/src/
-├── views/           # 頁面組件
+
+**組件中使用假資料：**
+```typescript
+// 在組件中 import 假資料
+import { useState } from 'react'
+import { mockUserList } from '@/mocks/story-0018/components/UserList.mock'
+
+const [users, setUsers] = useState(mockUserList.users)
+```
+
+**檔案結構（Monorepo v3）：**
+```
+src/apps/web/src/
+├── pages/           # 頁面組件
 ├── components/      # UI 組件
-└── composables/     # 可重用邏輯（含假資料）
+├── services/        # API 呼叫服務
+└── mocks/           # 假資料（按 story 分類）
 ```
 
 ### 3. 設定路由（如需要）
-若有新頁面，更新 `frontend/src/router/index.js`
+若有新頁面，更新 `src/apps/web/src/App.tsx` 或路由配置檔案（如使用 React Router）
 
 ### 4. 組件測試（可選）
 ```bash
-cd frontend && npm test -- --run
+cd src/apps/web && npm test -- --run
 ```
 - 測試組件是否正確渲染
 - 測試基本互動行為
 
 ### 5. 啟動開發伺服器
 ```bash
-cd frontend && npm run dev
+cd src/apps/web && npm run dev
 ```
 
 ### 6. 更新開發狀態
-更新 `_planning/02_active.md`，參考 `.windsurf/templates/dev-status-checklist.md`：
+更新 `pm/planning/02_active.md`，參考 `.windsurf/templates/dev-status-checklist.md`：
 ```markdown
 ## 開發階段檢查清單
 - [x] 需求規劃完成 (`/plan`)
@@ -140,6 +198,13 @@ created_at: 2026-01-12T04:30:00Z
   - 路徑：{URL 路徑}
   - 說明：{簡短說明}
 
+### 假資料檔案（供 /build-contract 參考）
+- [ ] O / [ ] X - `src/apps/web/src/mocks/{story-id}/components/{Component}.mock.ts`
+  - 包含 interface 定義
+  - 包含假資料
+  - 包含 UI 互動說明（註解）
+  - 包含預期 API（註解）
+
 ### UI/UX 驗證
 - [ ] O / [ ] X - UI 設計是否符合預期
 - [ ] O / [ ] X - 互動流程是否正確
@@ -178,7 +243,7 @@ created_at: 2026-01-12T04:30:00Z
    - 告訴使用者新查核單位置並等待再次驗證
 4. **若全部通過**：
    - 更新查核單狀態為 `status: completed`
-   - 更新 `02_active.md` 並提示下一步
+   - 更新 `pm/planning/02_active.md` 並提示下一步
 
 **⚠️ 重要規則：每次修改後都必須產生新版本查核單！**
 - 第一次：`CHLT-{時間}-Story{編號}-build-ui.md`

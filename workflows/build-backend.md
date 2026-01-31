@@ -19,13 +19,13 @@ description: 階段 3 - Backend 實作（TDD 流程）
 // turbo
 ```bash
 git branch --show-current
-cat _planning/02_active.md
+cat pm/planning/02_active.md
 ```
 - 確認已在 feature 分支
-- 確認規格已在 `02_active.md`
+- 確認規格已在 `pm/planning/02_active.md`
 - 若有前端，確認 Contract 階段已完成
 
-**⚠️ 重要：必須完整閱讀 `02_active.md` 的規格內容，理解：**
+**❗️ 重要：必須完整閱讀 `pm/planning/02_active.md` 的規格內容，理解：**
 - User Story 和驗收標準
 - Domain Analysis 中的 Entity、Use Case、Contracts
 - Technical Requirements 中的 Backend 需求
@@ -35,31 +35,31 @@ cat _planning/02_active.md
 ### 1. 讀取 Protocol 介面並對照規格
 // turbo
 ```bash
-cat shared_contracts/interfaces/{feature}_protocol.py
-cat shared_contracts/dto/{feature}.py
+cat src/contracts/python/interfaces/{feature}_protocol.py
+cat src/contracts/python/dto/{feature}.py
 ls pm/{story-id}/
 ```
 - 確認需要實作的方法簽名
 - 確認輸入輸出格式
 - **讀取前一步驟（`/build-contract`）的查核單**，了解已完成的 Contract 設計
 
-**⚠️ 強制要求：在開始實作前，必須明確列出以下內容（引用 `02_active.md`）：**
+**❗️ 強制要求：在開始實作前，必須明確列出以下內容（引用 `pm/planning/02_active.md`）：**
 
 ```markdown
 ## 規格引用
-### 來自 02_active.md 的 User Story
+### 來自 pm/planning/02_active.md 的 User Story
 > [複製 User Story 內容]
 
-### 來自 02_active.md 的 Domain Entities
+### 來自 pm/planning/02_active.md 的 Domain Entities
 > [複製 Domain Analysis > Domain Entities 內容]
 
-### 來自 02_active.md 的 Use Cases
+### 來自 pm/planning/02_active.md 的 Use Cases
 > [複製 Domain Analysis > Use Cases 內容]
 
-### 來自 02_active.md 的 Backend 需求
+### 來自 pm/planning/02_active.md 的 Backend 需求
 > [複製 Technical Requirements > Backend 內容]
 
-### 來自 02_active.md 的測試標準
+### 來自 pm/planning/02_active.md 的測試標準
 > [複製 Testing Criteria > Backend Unit Tests 內容]
 
 ### 來自前一步驟查核單的 Contract 設計
@@ -69,15 +69,16 @@ ls pm/{story-id}/
 **若規格不清楚，觸發 CLARIFICATION PROTOCOL，不要自行假設。**
 
 ### 2. 建立單元測試（TDD - Red）
-在 `backend/tests/unit/` 建立測試檔案：
+在 `src/core/` 對應目錄建立測試檔案（測試與原始碼同目錄）：
 
-**測試檔案命名：** `test_{feature}_service.py`
+**測試檔案命名：** `{feature}_service.unit.py`（與原始碼同目錄）
 
 **測試範例：**
 ```python
+# src/core/application/services/survey_service.unit.py
 import pytest
 from uuid import uuid4
-from app.services.survey_service import SurveyService
+from src.core.application.services.survey_service import SurveyService
 
 @pytest.mark.asyncio
 async def test_create_session():
@@ -105,7 +106,7 @@ async def test_process_response_correct_answer():
 ### 3. 驗證測試失敗（Red）
 // turbo
 ```bash
-cd backend && pytest tests/unit/test_{feature}_service.py -v
+cd src/core && pytest application/services/{feature}_service.unit.py -v
 ```
 - 測試必須先失敗，證明測試有效
 
@@ -115,7 +116,7 @@ cd backend && pytest tests/unit/test_{feature}_service.py -v
 #### 4.1 Domain Layer（領域層）
 **建立 Entity：**
 ```python
-# backend/app/domain/entities/survey_session_entity.py
+# src/core/domain/entities/survey_session_entity.py
 from dataclasses import dataclass
 from uuid import UUID
 from datetime import datetime
@@ -136,9 +137,9 @@ class SurveySessionEntity:
 
 **建立 Use Case：**
 ```python
-# backend/app/domain/use_cases/create_survey_session.py
-from app.domain.entities.survey_session_entity import SurveySessionEntity
-from app.domain.repositories.survey_repository import ISurveyRepository
+# src/core/domain/use-cases/create_survey_session.py
+from src.core.domain.entities.survey_session_entity import SurveySessionEntity
+from src.contracts.python.interfaces.survey_repository import ISurveyRepository
 
 class CreateSurveySessionUseCase:
     """建立 Survey Session 用例"""
@@ -161,9 +162,9 @@ class CreateSurveySessionUseCase:
 #### 4.2 Infrastructure Layer（基礎設施層）
 **建立 Repository：**
 ```python
-# backend/app/infrastructure/repositories/impl/survey_repository.py
-from app.domain.repositories.survey_repository import ISurveyRepository
-from app.domain.entities.survey_session_entity import SurveySessionEntity
+# src/core/infrastructure/repositories/survey_repository.py
+from src.contracts.python.interfaces.survey_repository import ISurveyRepository
+from src.core.domain.entities.survey_session_entity import SurveySessionEntity
 
 class SurveyRepository(ISurveyRepository):
     """Survey Repository 實作"""
@@ -179,10 +180,10 @@ class SurveyRepository(ISurveyRepository):
 #### 4.3 Application Layer（應用層）
 **建立 Service：**
 ```python
-# backend/app/services/impl/survey_service.py
-from shared_contracts.dto.survey import SurveySessionCreate, SurveySessionResponse
-from app.domain.use_cases.create_survey_session import CreateSurveySessionUseCase
-from app.infrastructure.repositories.impl.survey_repository import SurveyRepository
+# src/core/application/services/survey_service.py
+from src.contracts.python.dto.survey import SurveySessionCreate, SurveySessionResponse
+from src.core.domain.use_cases.create_survey_session import CreateSurveySessionUseCase
+from src.core.infrastructure.repositories.survey_repository import SurveyRepository
 
 class SurveyService:
     """Survey 應用服務 - 編排 Use Case"""
@@ -214,7 +215,7 @@ class SurveyService:
 ### 5. 驗證測試通過（Green）
 // turbo
 ```bash
-cd backend && pytest tests/unit/test_{feature}_service.py -v
+cd src/core && pytest application/services/{feature}_service.unit.py -v
 ```
 - 所有測試必須通過
 - 若失敗，回到步驟 4 修正
@@ -225,12 +226,12 @@ cd backend && pytest tests/unit/test_{feature}_service.py -v
 - 移除重複程式碼
 
 ### 7. 建立 API 端點
-在 `backend/app/api/` 建立或更新 API 路由：
+在 `src/apps/backend/routes/` 建立或更新 API 路由：
 
 ```python
-# backend/app/api/survey.py
+# src/apps/backend/routes/survey.py
 from fastapi import APIRouter, Depends
-from app.services.survey_service import SurveyService
+from src.core.application.services.survey_service import SurveyService
 
 router = APIRouter(prefix="/survey", tags=["survey"])
 
@@ -249,9 +250,9 @@ async def create_session(
 在 Backend 中移除 Mock Service 的切換邏輯，直接使用真實服務：
 
 ```python
-# backend/app/dependencies.py 或相關檔案
+# src/apps/backend/dependencies.py
 # 移除 Mock 切換邏輯，直接使用真實服務
-from app.services.survey_service import SurveyService
+from src.core.application.services.survey_service import SurveyService
 
 def get_survey_service(db: AsyncSession = Depends(get_db)):
     return SurveyService(db)
@@ -283,15 +284,16 @@ pm/{story}/CHLT-YYYYMMDDHHMM-{Story}-backend-verification.md
 ### 10. 自動化測試（依據查核單）
 根據查核單內容，撰寫自動化測試：
 
-在 `backend/tests/integration/` 建立測試檔案：
+在 `src/apps/backend/` 建立整合測試檔案：
 
-**測試檔案命名：** `test_{feature}_api.py`
+**測試檔案命名：** `{feature}_api.integration.py`
 
 **測試範例：**
 ```python
+# src/apps/backend/routes/survey_api.integration.py
 import pytest
 from httpx import AsyncClient
-from app.main import app
+from src.apps.backend.main import app
 
 @pytest.mark.asyncio
 async def test_create_endpoint():
@@ -310,13 +312,13 @@ async def test_create_endpoint():
 執行測試並自動更新查核單：
 // turbo
 ```bash
-cd backend && pytest tests/integration/test_{feature}_api.py -v
+cd src/apps/backend && pytest routes/{feature}_api.integration.py -v
 ```
 
 **測試通過後，自動在查核單中打勾。**
 
 ### 11. 更新開發狀態並提示下一步
-更新 `_planning/02_active.md`，參考 `.windsurf/templates/dev-status-checklist.md`：
+更新 `pm/planning/02_active.md`，參考 `.windsurf/templates/dev-status-checklist.md`：
 ```markdown
 ## 開發階段檢查清單
 - [x] 需求規劃完成 (`/plan`)
