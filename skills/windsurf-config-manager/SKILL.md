@@ -11,6 +11,9 @@ description: |
   - User wants to set coding standards, file size limits, or behavioral guidelines
   - User asks which configuration type to use for their needs
   - User mentions: Rule, Skill, Workflow, AGENTS.md, trigger, glob pattern
+  - **User asks to CREATE a new workflow** (e.g., "請做一個 workflow", "create a workflow")
+  - **User asks to CREATE a new rule** (e.g., "建立一個 rule", "add a rule")
+  - **User asks to CREATE a new skill** (e.g., "新增一個 skill")
   
   **DO NOT USE FOR:** General coding questions unrelated to Windsurf configuration.
 ---
