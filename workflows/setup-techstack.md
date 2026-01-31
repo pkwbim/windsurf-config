@@ -3,11 +3,11 @@ description: 設定專案技術棧 - 詢問並更新所有 AGENTS.md 檔案中�
 ---
 
 ## 🎯 目的
-透過 preset 或自訂流程，收集專案的技術棧選擇，並記錄到 `docs/tech-stack.md`。
+透過 `/discussion` 流程，收集專案的技術棧選擇，並記錄到 `docs/tech-stack.md`。
 
 ## ⚠️ 重要原則
-- **先問 preset 還是自訂**：讓使用者快速選擇
-- **Preset 可微調**：選擇 preset 後可調整細節
+- **使用 /discussion 流程**：所有詢問都透過討論檔案進行
+- **必須停下來等待**：產生討論檔案後，必須等待使用者回覆
 - **只記錄到 docs/tech-stack.md**：不更新 AGENTS.md（由 `/setup-agents` 負責）
 
 ## 🔗 執行順序
@@ -21,14 +21,25 @@ description: 設定專案技術棧 - 詢問並更新所有 AGENTS.md 檔案中�
 
 ## 📋 執行步驟
 
-### 1. 詢問使用 Preset 還是自訂
+### 1. 建立技術棧選擇討論檔案
 
-向使用者顯示以下選項：
+在 `discussions/` 資料夾建立討論檔案：
 
+**檔案命名格式：**
 ```
-🛠️ 技術棧設定
+discussions/DISC-YYYYMMDD-HHMM-TechStackSetup.md
+```
 
-請選擇設定方式：
+**檔案內容：**
+```markdown
+# 討論主題：專案技術棧設定
+
+## 📋 背景說明
+設定專案使用的技術棧，這些資訊將會記錄到 `docs/tech-stack.md`。
+
+## ❓ 問題
+
+### 問題 1：選擇設定方式
 
 **[P] 使用 Preset（推薦）**
 快速選擇預設組合，可微調細節
@@ -36,19 +47,11 @@ description: 設定專案技術棧 - 詢問並更新所有 AGENTS.md 檔案中�
 **[C] 自訂**
 從頭填寫技術棧問卷
 
-請輸入 P 或 C：
-```
+答：
 
 ---
 
-## 🅿️ Preset 流程
-
-### P-1. 顯示 Preset 清單
-
-如果使用者選擇 Preset，顯示以下清單：
-
-```
-📦 可用的 Preset
+### 問題 2：選擇 Preset（如果問題 1 選 P）
 
 | # | Preset 名稱 | 後端 | 前端 |
 |---|------------|------|------|
@@ -60,12 +63,46 @@ description: 設定專案技術棧 - 詢問並更新所有 AGENTS.md 檔案中�
 
 > 詳細比較請參考 `docs/techstack-presets-comparison.md`
 
-請輸入數字 (1-5)：
+答：（請輸入數字 1-5，如果問題 1 選 C 請填「跳過」）
+
+---
+
+## ⏳ 狀態
+- [ ] 等待回答
+- [ ] 已回答，待處理
 ```
 
-### P-2. 載入 Preset 預設值
+### 2. 通知使用者並停止
 
-根據選擇載入對應的預設值：
+告訴使用者：
+
+```
+我已建立技術棧討論檔案：`discussions/DISC-YYYYMMDD-HHMM-TechStackSetup.md`
+
+請在檔案中回答問題。完成後，請告訴我「我已回答」。
+
+⚠️ 在您回答之前，我不會執行任何動作。
+```
+
+**然後完全停止，不執行任何其他動作。**
+
+### 3. 等待使用者回覆
+- 使用者會說「我已回答」或類似的話
+- **只有在使用者明確表示已回答後，才繼續下一步**
+
+### 4. 讀取並判斷流程
+
+讀取討論檔案，根據使用者的選擇：
+- **如果選 P（Preset）**：繼續 Preset 流程
+- **如果選 C（自訂）**：繼續自訂流程
+
+---
+
+## 🅿️ Preset 流程
+
+### P-1. 載入 Preset 預設值
+
+根據使用者選擇的數字，載入對應的預設值：
 
 **Preset 1: fullstack-python-vue**
 ```yaml
@@ -180,103 +217,122 @@ tools:
   container: "Docker"
 ```
 
-### P-3. 顯示預設值並詢問是否微調
+### P-2. 建立微調討論檔案
 
+建立新的討論檔案詢問是否需要微調：
+
+**檔案命名格式：**
 ```
-📦 已選擇 Preset: {preset_name}
-
-預設配置：
-┌─────────────────────────────────────┐
-│ 後端 (Backend)                       │
-├─────────────────────────────────────┤
-│ Python: {python_version}             │
-│ Web 框架: {web_framework}            │
-│ ORM: {orm}                           │
-│ 資料庫: {database}                   │
-│ 測試: {test_framework}               │
-├─────────────────────────────────────┤
-│ 前端 (Frontend)                      │
-├─────────────────────────────────────┤
-│ Node.js: {node_version}              │
-│ 框架: {framework}                    │
-│ 狀態管理: {state_management}         │
-│ UI: {ui_framework}                   │
-│ 建置: {build_tool}                   │
-│ 測試: {test_framework}               │
-├─────────────────────────────────────┤
-│ 工具                                 │
-├─────────────────────────────────────┤
-│ 格式化: {formatter}                  │
-│ Linter: {linter}                     │
-│ CI/CD: {ci_cd}                       │
-│ 容器: {container}                    │
-└─────────────────────────────────────┘
-
-要微調任何項目嗎？
-[Y] 是，我要調整一些項目
-[N] 不用，直接使用這些設定
-
-請輸入 Y 或 N：
+discussions/DISC-YYYYMMDD-HHMM-TechStackSetup-Adjust.md
 ```
 
-### P-4. 微調流程（如果選 Y）
+**檔案內容：**
+```markdown
+# 討論主題：技術棧微調
+
+## 📋 背景說明
+您選擇了 Preset: {preset_name}
+
+## 📦 預設配置
+
+### 後端 (Backend)
+| 項目 | 預設值 |
+|------|--------|
+| Python 版本 | {python_version} |
+| Web 框架 | {web_framework} |
+| ORM | {orm} |
+| 資料庫 | {database} |
+| 測試框架 | {test_framework} |
+
+### 前端 (Frontend)
+| 項目 | 預設值 |
+|------|--------|
+| Node.js 版本 | {node_version} |
+| 套件管理器 | {package_manager} |
+| 框架 | {framework} |
+| 狀態管理 | {state_management} |
+| UI 框架 | {ui_framework} |
+| 建置工具 | {build_tool} |
+| 測試框架 | {test_framework} |
+| E2E 測試 | {e2e_test} |
+
+### 開發工具
+| 項目 | 預設值 |
+|------|--------|
+| 格式化 (前端) | {formatter_frontend} |
+| 格式化 (後端) | {formatter_backend} |
+| Linter (前端) | {linter_frontend} |
+| Linter (後端) | {linter_backend} |
+| CI/CD | {ci_cd} |
+| 容器化 | {container} |
+
+## ❓ 問題
+
+### 問題 1：是否需要微調？
+
+- **[Y]** 是，我要調整一些項目
+- **[N]** 不用，直接使用這些設定
+
+答：
+
+---
+
+### 問題 2：要調整哪些項目？（如果問題 1 選 Y）
+
+請列出要調整的項目和新值，格式：
+```
+項目名稱: 新值
+```
+
+例如：
+```
+Python 版本: 3.12
+資料庫: PostgreSQL
+```
+
+答：
+
+---
+
+## ⏳ 狀態
+- [ ] 等待回答
+- [ ] 已回答，待處理
+```
+
+### P-3. 通知使用者並停止
+
+告訴使用者：
 
 ```
-🔧 微調設定
+我已建立微調討論檔案：`discussions/DISC-YYYYMMDD-HHMM-TechStackSetup-Adjust.md`
 
-請輸入要修改的項目（可多選，用逗號分隔）：
+請在檔案中回答問題。完成後，請告訴我「我已回答」。
 
-後端：
-1. Python 版本 (目前: {python_version})
-2. 資料庫 (目前: {database})
-
-前端：
-3. Node.js 版本 (目前: {node_version})
-4. UI 框架 (目前: {ui_framework})
-
-例如輸入「1,3」修改 Python 版本和 Node.js 版本
-輸入「done」完成微調
-
-請輸入：
+⚠️ 在您回答之前，我不會執行任何動作。
 ```
 
-對於每個選擇的項目，詢問新的值：
-```
-Python 版本 (目前: 3.10)
-可選：3.10、3.11、3.12、3.13
-請輸入新值：
-```
+**然後完全停止，等待使用者回覆。**
 
-### P-5. 確認最終配置
+### P-4. 讀取微調結果
 
-```
-✅ 最終技術棧配置
-
-{顯示最終配置表格}
-
-確認以上配置？
-[Y] 確認，寫入 docs/tech-stack.md
-[N] 重新選擇
-
-請輸入 Y 或 N：
-```
+使用者說「我已回答」後，讀取討論檔案並套用微調。
 
 ---
 
 ## 🔧 自訂流程
 
-### C-1. 建立技術棧討論檔案
+### C-1. 建立完整技術棧問卷
 
-如果使用者選擇自訂，使用 `/discussion` workflow 建立討論檔案：
+建立新的討論檔案：
 
 **檔案命名格式：**
 ```
-discussions/DISC-YYYYMMDD-HHMM-TechStackSetup.md
+discussions/DISC-YYYYMMDD-HHMM-TechStackSetup-Custom.md
 ```
 
 **檔案內容：**
 ```markdown
-# 討論主題：專案技術棧設定
+# 討論主題：專案技術棧設定（自訂）
 
 ## 📋 背景說明
 設定專案使用的技術棧，這些資訊將會記錄到 `docs/tech-stack.md`。
@@ -336,7 +392,7 @@ discussions/DISC-YYYYMMDD-HHMM-TechStackSetup.md
 
 ---
 
-### 🖥️ 前端框架（選一個主要框架）
+### 🖥️ 前端框架
 
 **問題 8：前端框架**
 例：Vue 3、React 19、Astro + React、無
@@ -418,7 +474,7 @@ discussions/DISC-YYYYMMDD-HHMM-TechStackSetup.md
 ### C-2. 通知使用者並停止
 
 ```
-我已建立技術棧討論檔案：`discussions/DISC-YYYYMMDD-HHMM-TechStackSetup.md`
+我已建立技術棧問卷：`discussions/DISC-YYYYMMDD-HHMM-TechStackSetup-Custom.md`
 
 請在檔案中回答所有問題。完成後，請告訴我「我已回答」。
 
@@ -495,5 +551,6 @@ discussions/DISC-YYYYMMDD-HHMM-TechStackSetup.md
 
 1. 此 workflow 只更新 `docs/tech-stack.md`
 2. 不會更新 AGENTS.md（由 `/setup-agents` 負責）
-3. 可以重複執行此 workflow 來更新技術棧
-4. Preset 詳細比較請參考 `docs/techstack-presets-comparison.md`
+3. 所有詢問都透過 `/discussion` 檔案進行
+4. 可以重複執行此 workflow 來更新技術棧
+5. Preset 詳細比較請參考 `docs/techstack-presets-comparison.md`
