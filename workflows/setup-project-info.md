@@ -45,7 +45,6 @@ directories = [
     # 其他
     "tools",
     "scripts",
-    "logs",
     "out",
     "discussions",
     "docs",
@@ -74,7 +73,6 @@ from pathlib import Path
 
 # 建立 .gitkeep 檔案讓空目錄可以被 git 追蹤
 gitkeep_dirs = [
-    "logs",
     "out",
     "src",
 ]
@@ -139,7 +137,6 @@ key_dirs = [
     "enterprise",
     "tools",
     "scripts",
-    "logs",
     "out",
     "discussions",
     "docs",
@@ -182,7 +179,7 @@ else:
   - enterprise/ (企業版)
 
 📁 其他
-  - tools/, scripts/, logs/, out/
+  - tools/, scripts/, out/
   - discussions/, docs/
   - src/ (空目錄，等待 /setup-structure)
   - .windsurf/ (配置)

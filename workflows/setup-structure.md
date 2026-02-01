@@ -60,6 +60,12 @@ core_directories = [
     
     # src/apps (介面層) - 基礎目錄
     "src/apps",
+    
+    # src/logs (Log 輸出目錄)
+    "src/logs/archive",
+    
+    # src/shared/logging (Log 程式碼)
+    "src/shared/logging",
 ]
 
 for d in core_directories:
@@ -263,6 +269,8 @@ key_dirs = [
     "src/core/infrastructure",
     "src/core/application",
     "src/apps",
+    "src/logs",
+    "src/shared/logging",
 ]
 
 print("🔍 驗證目錄結構...")
@@ -289,9 +297,12 @@ else:
 📁 contracts/ - 共享契約
 📁 core/ - DDD 三層（domain, infrastructure, application）
 📁 apps/ - 介面層（backend, web, cli, desktop）
+📁 logs/ - Log 輸出目錄（gitignore）
+📁 shared/logging/ - Log 程式碼
 
 下一步：
-  - 執行 `/setup-agents` 建立 AGENTS.md
+  - 執行 `/setup-logging` 產生 logging 程式碼
+  - 或執行 `/setup-agents` 建立 AGENTS.md
 ```
 
 ## 📝 注意事項

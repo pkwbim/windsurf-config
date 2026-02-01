@@ -110,6 +110,16 @@ discussions/DISC-YYYYMMDD-HHMM-TechStackSetup.md
 | CI/CD | GitHub Actions | |
 | 容器化 | Docker | |
 
+### 📝 Logging
+
+| 項目 | 預設值 | 您的選擇 |
+|------|--------|----------|
+| Python Log 框架 | loguru | |
+| TypeScript Log 框架 | winston | |
+| Rust Log 框架 | tracing | |
+
+> Preset 預設使用上述框架，如需變更請填寫「您的選擇」欄位
+
 ---
 
 ## ⏳ 狀態
@@ -177,6 +187,10 @@ tools:
   linter_backend: "Ruff"
   ci_cd: "GitHub Actions"
   container: "Docker"
+logging:
+  python: "loguru"
+  typescript: "winston"
+  rust: "tracing"
 ```
 
 **Preset 2: fullstack-python-react**
@@ -203,6 +217,10 @@ tools:
   linter_backend: "Ruff"
   ci_cd: "GitHub Actions"
   container: "Docker"
+logging:
+  python: "loguru"
+  typescript: "winston"
+  rust: "tracing"
 ```
 
 **Preset 3: fullstack-python-astro**
@@ -229,6 +247,10 @@ tools:
   linter_backend: "Ruff"
   ci_cd: "GitHub Actions"
   container: "Docker"
+logging:
+  python: "loguru"
+  typescript: "winston"
+  rust: "tracing"
 ```
 
 **Preset 4: backend-only**
@@ -245,6 +267,8 @@ tools:
   linter_backend: "Ruff"
   ci_cd: "GitHub Actions"
   container: "Docker"
+logging:
+  python: "loguru"
 ```
 
 **Preset 5: frontend-only**
@@ -264,6 +288,8 @@ tools:
   linter_frontend: "ESLint"
   ci_cd: "GitHub Actions"
   container: "Docker"
+logging:
+  typescript: "winston"
 ```
 
 ---
@@ -309,6 +335,12 @@ tools:
 - **Linter (後端)**: {工具}
 - **CI/CD**: {工具}
 - **容器化**: {工具}
+
+## Logging
+
+- **Python**: {框架}
+- **TypeScript**: {框架}
+- **Rust**: {框架}
 ```
 
 ---

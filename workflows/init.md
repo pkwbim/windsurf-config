@@ -14,15 +14,16 @@ description: 初始化 Monorepo 專案（引導流程）
 
 ## 📋 初始化流程
 
-### 完整流程（5 個階段）
+### 完整流程（6 個階段）
 
 | 順序 | Workflow | 用途 | 預估時間 |
 |------|----------|------|----------|
 | 1 | `/setup-project-info` | 建立非技術目錄 | 1 分鐘 |
 | 2 | `/setup-techstack` | 設定技術棧（需回答問卷） | 3-5 分鐘 |
 | 3 | `/setup-structure` | 建立 src/ 目錄結構 | 1 分鐘 |
-| 4 | `/setup-agents` | 建立 AGENTS.md | 2 分鐘 |
-| 5 | `/setup-makefile` | 建立 Makefile（可選） | 1 分鐘 |
+| 4 | `/setup-logging` | 產生 logging 程式碼（可選） | 1 分鐘 |
+| 5 | `/setup-agents` | 建立 AGENTS.md | 2 分鐘 |
+| 6 | `/setup-makefile` | 建立 Makefile（可選） | 1 分鐘 |
 
 ---
 
@@ -58,9 +59,10 @@ from pathlib import Path
 checks = [
     ("1. 非技術目錄", ["pm/planning", "policies", "management"]),
     ("2. 技術棧設定", ["docs/tech-stack.md"]),
-    ("3. src/ 結構", ["src/core", "src/contracts", "src/apps"]),
-    ("4. AGENTS.md", ["AGENTS.md", "src/AGENTS.md"]),
-    ("5. Makefile", ["Makefile"]),
+    ("3. src/ 結構", ["src/core", "src/contracts", "src/apps", "src/logs"]),
+    ("4. Logging 程式碼", ["src/shared/logging"]),
+    ("5. AGENTS.md", ["AGENTS.md", "src/AGENTS.md"]),
+    ("6. Makefile", ["Makefile"]),
 ]
 
 print("📊 專案初始化狀態\n")
@@ -98,14 +100,22 @@ print("\n提示：選擇上方選項 [A-E] 開始初始化")
 - `src/contracts/` - 共享契約
 - `src/core/` - DDD 三層架構
 - `src/apps/` - 介面層（backend, web）
+- `src/logs/` - Log 輸出目錄
+- `src/shared/logging/` - Log 程式碼目錄
 
-### 階段 4：`/setup-agents`
+### 階段 4：`/setup-logging`（可選）
+根據技術棧產生 logging 程式碼：
+- Python: `loguru` + SQLite handler
+- TypeScript: `winston` + SQLite transport
+- Rust: `tracing` + SQLite layer
+
+### 階段 5：`/setup-agents`
 建立所有 AGENTS.md 規範檔案：
 - 根目錄 AGENTS.md
 - 各層級 AGENTS.md
 - 內容根據技術棧動態調整
 
-### 階段 5：`/setup-makefile`（可選）
+### 階段 6：`/setup-makefile`（可選）
 建立 Makefile 和依賴檔案：
 - Python 虛擬環境管理
 - 前後端開發指令

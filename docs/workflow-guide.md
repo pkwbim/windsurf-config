@@ -12,6 +12,7 @@
 | `/setup-project-info` | 建立非技術目錄 | 新專案初始化 |
 | `/setup-techstack` | 設定技術棧 | 新專案或更換技術棧 |
 | `/setup-structure` | 建立 src/ 目錄 | 新專案或重建目錄 |
+| `/setup-logging` | 產生 logging 程式碼 | 新專案或需要統一 log |
 | `/setup-agents` | 建立 AGENTS.md | 新專案或更新規範 |
 | `/setup-makefile` | 建立 Makefile | 需要開發環境指令 |
 
@@ -33,8 +34,9 @@
 /setup-project-info    # 1. 建立目錄
 /setup-techstack       # 2. 設定技術棧（會停下來等你回答）
 /setup-structure       # 3. 建立 src/
-/setup-agents          # 4. 建立 AGENTS.md
-/setup-makefile        # 5. 建立 Makefile
+/setup-logging         # 4. 產生 logging 程式碼（可選）
+/setup-agents          # 5. 建立 AGENTS.md
+/setup-makefile        # 6. 建立 Makefile
 ```
 
 ---
@@ -71,13 +73,14 @@ policies/       # 公司規定
 enterprise/     # 企業版
 tools/          # 工具腳本
 scripts/        # 自動化腳本
-logs/           # 日誌
 out/            # 輸出
 discussions/    # 討論檔案
 docs/           # 文件
 src/            # 程式碼（空目錄）
 .windsurf/      # 配置
 ```
+
+**注意**：`logs/` 目錄已移至 `src/logs/`，由 `/setup-structure` 建立
 
 **建立的檔案**：
 - `AGENTS.md` - 最小版本（從模板複製）
@@ -130,16 +133,43 @@ src/
 │   ├── domain/
 │   ├── infrastructure/
 │   └── application/
-└── apps/               # 介面層
-    ├── backend/        # 如果使用後端
-    ├── web/            # 如果使用前端
-    ├── cli/
-    └── desktop/
+├── apps/               # 介面層
+│   ├── backend/        # 如果使用後端
+│   ├── web/            # 如果使用前端
+│   ├── cli/
+│   └── desktop/
+├── logs/               # Log 輸出目錄（gitignore）
+│   └── archive/        # 歸檔的舊 log
+└── shared/
+    └── logging/        # Log 程式碼
 ```
 
 **動態調整**：
 - 根據技術棧決定建立哪些語言目錄
 - 前端目錄結構根據框架調整（Vue/React/Astro）
+
+---
+
+### `/setup-logging` - 產生 Logging 程式碼
+
+**用途**：根據技術棧產生統一的 logging 程式碼
+
+**前置條件**：`docs/tech-stack.md` 必須存在，`src/shared/logging/` 目錄必須存在
+
+**產生的檔案**：
+
+| 語言 | 框架 | 檔案 |
+|------|------|------|
+| Python | `loguru` | `logger.py`, `sqlite_handler.py` |
+| TypeScript | `winston` | `logger.ts`, `sqlite-transport.ts` |
+| Rust | `tracing` | `mod.rs`, `sqlite_layer.rs` |
+
+**Log 規格**：
+- 格式：`[YYYY-MM-DD HH:MM:SS] [LEVEL] [module] message`
+- 輸出：stdout/stderr、文字檔案、SQLite
+- 保留：30 天
+
+**相關文件**：`docs/logging-strategy.md`
 
 ---
 
@@ -207,7 +237,8 @@ make venv-info      # 顯示虛擬環境資訊
 ### Q: 技術棧設定錯了怎麼辦？
 
 1. 重新執行 `/setup-techstack`
-2. 執行 `/setup-agents` 更新 AGENTS.md
+2. 執行 `/setup-logging` 更新 logging 程式碼
+3. 執行 `/setup-agents` 更新 AGENTS.md
 
 ### Q: 如何查看目前狀態？
 
@@ -223,3 +254,4 @@ make venv-info      # 顯示虛擬環境資訊
 | `.windsurf/workflows/setup-*.md` | 各階段 workflow |
 | `.windsurf/templates/` | 模板檔案 |
 | `docs/tech-stack.md` | 技術棧設定（執行後產生） |
+| `docs/logging-strategy.md` | Logging 策略說明 |
