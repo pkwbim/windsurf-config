@@ -90,11 +90,15 @@ pytest-django==4.5.2
     "@astrojs/tailwind": "^5.0.0",
     "react": "^18.0.0",
     "react-dom": "^18.0.0",
-    "zustand": "^4.4.0"
+    "zustand": "^4.4.0",
+    "winston": "^3.11.0",
+    "better-sqlite3": "^9.2.0"
   },
   "devDependencies": {
     "@types/react": "^18.0.0",
     "@types/react-dom": "^18.0.0",
+    "@types/node": "^20.0.0",
+    "@types/better-sqlite3": "^7.6.0",
     "prettier": "^3.0.0",
     "eslint": "^8.0.0",
     "tailwindcss": "^3.3.0",
@@ -121,10 +125,14 @@ pytest-django==4.5.2
   },
   "dependencies": {
     "vue": "^3.3.0",
-    "pinia": "^2.1.0"
+    "pinia": "^2.1.0",
+    "winston": "^3.11.0",
+    "better-sqlite3": "^9.2.0"
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^4.0.0",
+    "@types/node": "^20.0.0",
+    "@types/better-sqlite3": "^7.6.0",
     "vite": "^5.0.0",
     "typescript": "^5.0.0",
     "vitest": "^1.0.0"

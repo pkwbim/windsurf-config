@@ -245,9 +245,15 @@ export { logger, setupLogging, getLogger } from './logger';
  */
 import winston from 'winston';
 import path from 'path';
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
 import { SQLiteTransport } from './sqlite-transport';
 
-const LOG_DIR = path.join(__dirname, '../../logs');
+// ESM 模式下取得 __dirname
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
+const LOG_DIR = path.join(__dirname, '../../storage/logs');
 
 // 統一格式
 const logFormat = winston.format.printf(({ level, message, timestamp, module }) => {
