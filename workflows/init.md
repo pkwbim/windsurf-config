@@ -2,6 +2,23 @@
 description: 初始化 Monorepo 專案（引導流程）
 ---
 
+## ⚙️ 執行前準備
+
+**在執行此 workflow 前，請先手動載入執行規則：**
+
+```
+請先讀取並遵循 `.windsurf/rules/init-workflow-rules.md` 中的所有規則。
+```
+
+這個 rule 檔案包含：
+- 嚴格的 workflow 執行規範
+- 模板使用規則
+- 檔案命名規範
+- 預設值驗證規則
+- 常見錯誤與避免方式
+
+---
+
 ## 🎯 目的
 
 這是 Monorepo 專案初始化的**入口 workflow**，引導你按正確順序執行各個初始化步驟。
