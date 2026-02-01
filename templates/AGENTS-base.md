@@ -27,7 +27,6 @@ project/
 ├── enterprise/              # 企業版
 ├── tools/                   # 工具腳本
 ├── scripts/                 # 自動化腳本
-├── logs/                    # 日誌檔案
 ├── out/                     # 輸出檔案
 ├── discussions/             # 全域討論檔案
 ├── docs/                    # 文件

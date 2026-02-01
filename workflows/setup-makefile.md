@@ -8,6 +8,9 @@ description: 建立或更新 Makefile，包含虛擬環境管理
 - 前後端並行開發環境
 - 依賴管理和安裝
 - 清理和建置指令
+- `.env.example` 和 `.env` 檔案建立
+- `src/storage/` 目錄結構
+- `make dev-remote` 遠端開發指令
 
 ## 📋 執行步驟
 
@@ -114,7 +117,75 @@ pytest-django==4.5.2
 }
 ```
 
-### 4. 建立完整的 Makefile
+### 4. 建立 src/storage 目錄結構
+
+// turbo
+```bash
+python3 << 'EOF'
+from pathlib import Path
+
+storage_dirs = [
+    "src/storage/database",
+    "src/storage/logs",
+    "src/storage/cache",
+    "src/storage/uploads",
+    "src/storage/temp",
+]
+
+for d in storage_dirs:
+    Path(d).mkdir(parents=True, exist_ok=True)
+    gitkeep = Path(d) / ".gitkeep"
+    if not gitkeep.exists():
+        gitkeep.touch()
+    print(f"✅ {d}")
+
+print("\n📁 Storage 目錄結構建立完成")
+EOF
+```
+
+### 5. 建立 .env.example 和 .env 檔案
+
+#### Backend .env.example
+建立 `src/apps/backend/.env.example`：
+
+```bash
+# Database
+DATABASE_URL=sqlite:///../../storage/database/app.db
+LOG_DATABASE_URL=sqlite:///../../storage/database/log.db
+
+# Server
+BACKEND_HOST=0.0.0.0
+BACKEND_PORT=8000
+
+# Environment
+ENV=development
+DEBUG=true
+
+# Logging
+LOG_LEVEL=INFO
+LOG_FILE=../../storage/logs/app.log
+```
+
+#### Frontend .env.example
+建立 `src/apps/web/.env.example`：
+
+```bash
+# API
+VITE_API_URL=http://localhost:8000
+
+# Environment
+NODE_ENV=development
+```
+
+#### 複製為 .env
+// turbo
+```bash
+cp src/apps/backend/.env.example src/apps/backend/.env 2>/dev/null || true
+cp src/apps/web/.env.example src/apps/web/.env 2>/dev/null || true
+echo "✅ .env 檔案已建立"
+```
+
+### 6. 建立完整的 Makefile
 在專案根目錄建立 `Makefile`，包含以下功能：
 
 #### 變數定義
@@ -122,12 +193,12 @@ pytest-django==4.5.2
 VENV_DIR = .venv
 PYTHON = $(VENV_DIR)/bin/python
 PIP = $(VENV_DIR)/bin/pip
-UVICORN = $(VENV_DIR)/bin/uvicorn
 ```
 
 #### 核心指令
 - `make help` - 顯示所有可用指令
 - `make dev` - 啟動完整開發環境（前端 + 後端，自動建立 venv）
+- `make dev-remote` - 遠端開發環境（監聽 0.0.0.0）
 - `make install` - 安裝所有依賴（自動建立 venv）
 - `make clean` - 清理所有建置產物和依賴
 
@@ -283,13 +354,24 @@ $(VENV_DIR):
 # 開發環境 - 同時啟動前後端
 dev: backend-install frontend-install
 	@echo "Starting development environment (frontend + backend)..."
-	@echo "Frontend: http://localhost:5173"
+	@echo "Frontend: http://localhost:4321"
 	@echo "Backend:  http://localhost:8000"
 	@echo "API Docs: http://localhost:8000/docs"
 	@echo ""
 	@trap 'kill 0' EXIT; \
-	(cd src/apps/backend && $(UVICORN) main:app --reload --host 0.0.0.0 --port 8000) & \
+	(cd src/apps/backend && $(PYTHON) -m uvicorn main:app --reload --host 0.0.0.0 --port 8000) & \
 	(cd src/apps/web && npm run dev)
+
+# 遠端開發環境 - 監聽所有介面
+dev-remote: backend-install frontend-install
+	@echo "Starting remote development environment..."
+	@echo "Frontend: http://<host-ip>:4321"
+	@echo "Backend:  http://<host-ip>:8000"
+	@echo "API Docs: http://<host-ip>:8000/docs"
+	@echo ""
+	@trap 'kill 0' EXIT; \
+	(cd src/apps/backend && $(PYTHON) -m uvicorn main:app --reload --host 0.0.0.0 --port 8000) & \
+	(cd src/apps/web && npm run dev -- --host 0.0.0.0)
 
 # 安裝所有依賴
 install: frontend-install backend-install
@@ -341,7 +423,7 @@ backend-dev: $(VENV_DIR)
 	@echo "Backend:  http://localhost:8000"
 	@echo "API Docs: http://localhost:8000/docs"
 	@test -f src/apps/backend/main.py || { echo "Error: src/apps/backend/main.py not found"; exit 1; }
-	cd src/apps/backend && $(UVICORN) main:app --reload --host 0.0.0.0 --port 8000
+	cd src/apps/backend && $(PYTHON) -m uvicorn main:app --reload --host 0.0.0.0 --port 8000
 
 backend-clean:
 	@echo "Cleaning backend cache and artifacts..."

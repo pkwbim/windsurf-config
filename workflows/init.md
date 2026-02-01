@@ -14,7 +14,7 @@ description: 初始化 Monorepo 專案（引導流程）
 
 ## 📋 初始化流程
 
-### 完整流程（6 個階段）
+### 完整流程（7 個階段）
 
 | 順序 | Workflow | 用途 | 預估時間 |
 |------|----------|------|----------|
@@ -23,7 +23,8 @@ description: 初始化 Monorepo 專案（引導流程）
 | 3 | `/setup-structure` | 建立 src/ 目錄結構 | 1 分鐘 |
 | 4 | `/setup-logging` | 產生 logging 程式碼（可選） | 1 分鐘 |
 | 5 | `/setup-agents` | 建立 AGENTS.md | 2 分鐘 |
-| 6 | `/setup-makefile` | 建立 Makefile（可選） | 1 分鐘 |
+| 6 | `/setup-makefile` | 建立 Makefile 和 .env | 1 分鐘 |
+| 7 | `/setup-sample-project` | 建立 Hello World 範例 | 2 分鐘 |
 
 ---
 
@@ -59,10 +60,11 @@ from pathlib import Path
 checks = [
     ("1. 非技術目錄", ["pm/planning", "policies", "management"]),
     ("2. 技術棧設定", ["docs/tech-stack.md"]),
-    ("3. src/ 結構", ["src/core", "src/contracts", "src/apps", "src/logs"]),
+    ("3. src/ 結構", ["src/core", "src/contracts", "src/apps", "src/storage"]),
     ("4. Logging 程式碼", ["src/shared/logging"]),
     ("5. AGENTS.md", ["AGENTS.md", "src/AGENTS.md"]),
     ("6. Makefile", ["Makefile"]),
+    ("7. Sample Project", ["src/apps/web/src/stores/apiStore.ts", "src/apps/backend/.env"]),
 ]
 
 print("📊 專案初始化狀態\n")
@@ -115,11 +117,20 @@ print("\n提示：選擇上方選項 [A-E] 開始初始化")
 - 各層級 AGENTS.md
 - 內容根據技術棧動態調整
 
-### 階段 6：`/setup-makefile`（可選）
+### 階段 6：`/setup-makefile`
 建立 Makefile 和依賴檔案：
 - Python 虛擬環境管理
 - 前後端開發指令
 - `make dev` 一鍵啟動
+- `make dev-remote` 遠端開發指令
+- `.env.example` 和 `.env` 檔案
+
+### 階段 7：`/setup-sample-project`
+建立完整的 Hello World 範例：
+- Backend API（含 logging）
+- Frontend 首頁（含 Zustand store）
+- 前後端串接驗證
+- `src/storage/` 目錄結構
 
 ---
 
