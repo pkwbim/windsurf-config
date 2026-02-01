@@ -165,9 +165,42 @@ loguru==0.7.2
 
 ---
 
-## 步驟 4：建立 Frontend 首頁
+## 步驟 4：建立 Astro 配置檔案
 
-### 4.1 建立 Zustand Store
+### 4.1 建立 astro.config.mjs
+
+建立 `src/apps/web/astro.config.mjs`：
+
+```javascript
+import { defineConfig } from 'astro/config';
+import react from '@astrojs/react';
+import tailwind from '@astrojs/tailwind';
+
+// https://astro.build/config
+export default defineConfig({
+  integrations: [react(), tailwind()],
+});
+```
+
+### 4.2 建立 tsconfig.json
+
+建立 `src/apps/web/tsconfig.json`：
+
+```json
+{
+  "extends": "astro/tsconfigs/strict",
+  "compilerOptions": {
+    "jsx": "react-jsx",
+    "jsxImportSource": "react"
+  }
+}
+```
+
+---
+
+## 步驟 5：建立 Frontend 首頁
+
+### 5.1 建立 Zustand Store
 
 建立 `src/apps/web/src/stores/apiStore.ts`：
 
@@ -190,7 +223,24 @@ interface ApiStore {
   fetchGreeting: (name: string) => Promise<void>;
 }
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+// 自動偵測 API URL：支援本地和遠端訪問
+// - 優先使用環境變數 VITE_API_URL
+// - 否則根據當前瀏覽器的 host 自動判斷（解決遠端訪問 CORS 問題）
+const getApiUrl = () => {
+  if (import.meta.env.VITE_API_URL) {
+    return import.meta.env.VITE_API_URL;
+  }
+  // 在瀏覽器中執行時，使用當前 host 的 IP/domain，但改用 backend port
+  if (typeof window !== 'undefined') {
+    const protocol = window.location.protocol;
+    const hostname = window.location.hostname;
+    return `${protocol}//${hostname}:{BACKEND_PORT}`;  // 使用 /setup-makefile 設定的 port
+  }
+  // SSR 時的預設值
+  return 'http://localhost:{BACKEND_PORT}';
+};
+
+const API_URL = getApiUrl();
 
 export const useApiStore = create<ApiStore>((set) => ({
   healthStatus: null,
@@ -222,7 +272,7 @@ export const useApiStore = create<ApiStore>((set) => ({
 }));
 ```
 
-### 4.2 建立 React 元件
+### 5.2 建立 React 元件
 
 建立 `src/apps/web/src/components/HelloWorld.tsx`：
 
@@ -282,7 +332,7 @@ export const HelloWorld: React.FC = () => {
       <section className="next-steps">
         <h2>📋 Next Steps</h2>
         <ul>
-          <li>Check API docs at <a href="http://localhost:8000/docs" target="_blank">/docs</a></li>
+          <li>Check API docs at <a href={`http://localhost:{BACKEND_PORT}/docs`} target="_blank">/docs</a></li>
           <li>Add your first feature with <code>/build</code> workflow</li>
           <li>Create user stories with <code>/idea</code> workflow</li>
         </ul>
@@ -345,7 +395,7 @@ export const HelloWorld: React.FC = () => {
 
 ### 5.3 更新首頁
 
-更新 `src/apps/web/src/pages/index.astro`：
+建立 `src/apps/web/src/pages/index.astro`：
 
 ```astro
 ---
@@ -367,32 +417,6 @@ import { HelloWorld } from '../components/HelloWorld';
 
 ---
 
-## 步驟 5：更新 Makefile 加入 dev-remote
-
-在 Makefile 中加入 `dev-remote` 指令：
-
-```makefile
-# Remote development - for Windsurf/SSH access
-dev-remote: backend-install frontend-install
-	@echo ""
-	@echo "╔════════════════════════════════════════════════════════════╗"
-	@echo "║      Starting Remote Development Environment               ║"
-	@echo "╚════════════════════════════════════════════════════════════╝"
-	@echo ""
-	@echo "🌐 Services are listening on 0.0.0.0 (all interfaces)"
-	@echo "🎨 Frontend: http://<your-host-ip>:4321"
-	@echo "🐍 Backend:  http://<your-host-ip>:8000"
-	@echo "📚 API Docs: http://<your-host-ip>:8000/docs"
-	@echo ""
-	@echo "Press Ctrl+C to stop both servers"
-	@echo ""
-	@trap 'kill 0' EXIT; \
-	(cd src/apps/backend && $(PYTHON) -m uvicorn main:app --reload --host 0.0.0.0 --port 8000) & \
-	(cd src/apps/web && npm run dev -- --host 0.0.0.0)
-```
-
----
-
 ## 步驟 6：驗證
 
 // turbo
@@ -407,6 +431,8 @@ files_to_check = [
     "src/apps/backend/.env",
     "src/apps/backend/main.py",
     "src/apps/web/.env",
+    "src/apps/web/astro.config.mjs",
+    "src/apps/web/tsconfig.json",
     "src/apps/web/src/stores/apiStore.ts",
     "src/apps/web/src/components/HelloWorld.tsx",
     "src/apps/web/src/pages/index.astro",

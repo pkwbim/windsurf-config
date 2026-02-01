@@ -394,13 +394,21 @@ export class SQLiteTransport extends Transport {
 // turbo
 ```python
 from pathlib import Path
+import re
 
 tech_stack = Path("docs/tech-stack.md").read_text(encoding="utf-8")
 
-if "Rust" in tech_stack and "無" not in tech_stack.split("Rust")[1][:50]:
-    print("🦀 需要產生 Rust logging 程式碼")
+# 檢查 Logging 區塊是否有 Rust: tracing
+# 只有在 Logging 區塊明確列出 Rust 時才產生 Rust logging 程式碼
+logging_section = re.search(r'## Logging\s*(.*?)(?=##|$)', tech_stack, re.DOTALL)
+if logging_section:
+    logging_content = logging_section.group(1)
+    if "Rust" in logging_content and "tracing" in logging_content:
+        print("🦀 需要產生 Rust logging 程式碼")
+    else:
+        print("⏭️ Logging 區塊未設定 Rust，跳過")
 else:
-    print("⏭️ 不使用 Rust，跳過")
+    print("⏭️ 找不到 Logging 區塊，跳過 Rust")
 ```
 
 **如果使用 Rust，產生以下檔案：**

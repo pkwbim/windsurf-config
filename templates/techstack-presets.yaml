@@ -30,7 +30,6 @@ presets:
     logging:
       python: "loguru"
       typescript: "winston"
-      rust: "tracing"
 
   2:
     name: fullstack-python-react
@@ -60,7 +59,6 @@ presets:
     logging:
       python: "loguru"
       typescript: "winston"
-      rust: "tracing"
 
   3:
     name: fullstack-python-astro
@@ -90,7 +88,6 @@ presets:
     logging:
       python: "loguru"
       typescript: "winston"
-      rust: "tracing"
 
   4:
     name: backend-only

@@ -26,12 +26,27 @@ cat docs/tech-stack.md
 - 前端框架類型（Astro/Vue/React - 決定 dev server 指令）
 - 後端框架類型（FastAPI/Django - 決定啟動指令）
 
-### 2. 檢查現有 Makefile
+### 2. 詢問 Port 設定
+詢問使用者想要使用的 port：
+
+```
+請問 Backend API 要使用哪個 port？
+- 預設: 8200
+- 如果有其他服務佔用，請輸入其他 port 號碼
+- 直接按 Enter 使用預設值
+
+Backend Port [8200]: 
+```
+
+將使用者輸入的 port 記錄下來，後續步驟會使用這個值。
+如果使用者直接按 Enter，則使用預設值 `8200`。
+
+### 3. 檢查現有 Makefile
 檢查專案根目錄是否已有 Makefile。
 - 如果存在，詢問使用者是否要備份（建立 `Makefile.backup`）
 - 如果不存在，直接建立新的
 
-### 3. 建立依賴檔案（根據技術棧）
+### 4. 建立依賴檔案（根據技術棧）
 
 #### 3.1 建立後端 requirements.txt
 如果使用 Python 後端，建立 `src/apps/backend/requirements.txt`：
@@ -146,7 +161,7 @@ EOF
 ### 5. 建立 .env.example 和 .env 檔案
 
 #### Backend .env.example
-建立 `src/apps/backend/.env.example`：
+建立 `src/apps/backend/.env.example`（使用步驟 2 詢問的 port）：
 
 ```bash
 # Database
@@ -155,7 +170,7 @@ LOG_DATABASE_URL=sqlite:///../../storage/database/log.db
 
 # Server
 BACKEND_HOST=0.0.0.0
-BACKEND_PORT=8000
+BACKEND_PORT={BACKEND_PORT}  # 使用步驟 2 詢問的 port，預設 8200
 
 # Environment
 ENV=development
@@ -167,11 +182,12 @@ LOG_FILE=../../storage/logs/app.log
 ```
 
 #### Frontend .env.example
-建立 `src/apps/web/.env.example`：
+建立 `src/apps/web/.env.example`（使用步驟 2 詢問的 port）：
 
 ```bash
 # API
-VITE_API_URL=http://localhost:8000
+# 注意：實際運行時會由 apiStore.ts 自動偵測 host，此設定僅供參考
+VITE_API_URL=http://localhost:{BACKEND_PORT}
 
 # Environment
 NODE_ENV=development
