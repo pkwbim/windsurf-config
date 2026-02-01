@@ -5,10 +5,19 @@ description: 階段 4 - 建立所有 AGENTS.md 檔案（根據技術棧）
 ## 🎯 目的
 根據 `docs/tech-stack.md` 的技術棧設定，建立所有層級的 AGENTS.md 規範檔案。
 
+## 📚 參考資源
+- **windsurf-config-manager skill**: 提供 AGENTS.md 的最佳實踐和規範
+- 執行前建議參考該 skill 了解 AGENTS.md 的用途和結構
+
 ## ⚠️ 重要原則
 - **讀取 docs/tech-stack.md**：根據技術棧調整 AGENTS.md 內容
 - **不建立目錄**：目錄由 `/setup-project-info` 和 `/setup-structure` 建立
 - **內容根據技術棧調整**：例如 web/AGENTS.md 會根據 Vue/React/Astro 調整
+- **遵循 AGENTS.md 最佳實踐**：
+  - 專注於目錄特定的規範
+  - 使用清晰的格式（標題、列表、程式碼區塊）
+  - 提供具體範例
+  - 避免冗餘（會繼承父目錄的規範）
 
 ## 🔗 執行順序
 此 workflow 是四階段初始化流程的第四階段：
@@ -252,7 +261,8 @@ else:
 🎉 專案初始化完成！
 
 下一步：
-  - 執行 `make install` 安裝依賴
+  - 執行 `/setup-makefile` 建立 Makefile 和虛擬環境管理
+  - 建立完成後即可使用 `make install` 安裝依賴
   - 使用 `/build-ui` 開始 UI 開發
   - 使用 `/build-backend` 開始後端開發
 ```

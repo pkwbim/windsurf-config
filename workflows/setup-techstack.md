@@ -53,13 +53,13 @@ discussions/DISC-YYYYMMDD-HHMM-TechStackSetup.md
 
 ## ❓ 問題 2：選擇 Preset（如果問題 1 選 P）
 
-| # | Preset 名稱 | 後端 | 前端 |
-|---|------------|------|------|
-| 1 | fullstack-python-vue | Python + FastAPI | Vue 3 + Pinia + Vite |
-| 2 | fullstack-python-react | Python + FastAPI | React + Zustand + Vite |
-| 3 | fullstack-python-astro | Python + FastAPI | Astro + React + Zustand |
-| 4 | backend-only | Python + FastAPI | 無 |
-| 5 | frontend-only | 無 | Vue 3 + Pinia + Vite |
+| # | Preset 名稱 | 後端 | 前端 | 建議使用情境 |
+|---|------------|------|------|------------|
+| 1 | fullstack-python-vue | Python + FastAPI | Vue 3 + Pinia + Vite | 漸進式框架，適合中小型 SPA、管理後台、內部工具 |
+| 2 | fullstack-python-react | Python + FastAPI | React + Zustand + Vite | 生態系最大，適合需要豐富第三方套件的專案 |
+| 3 | fullstack-python-astro | Python + FastAPI | Astro + React + Zustand | 內容導向網站、部落格、文件站、SEO 優先專案 |
+| 4 | backend-only | Python + FastAPI | 無 | 純 API 服務、微服務、CLI 工具 |
+| 5 | frontend-only | 無 | Vue 3 + Pinia + Vite | 純靜態網站、使用外部 API 的前端專案 |
 
 > 詳細比較請參考 `docs/techstack-presets-comparison.md`
 

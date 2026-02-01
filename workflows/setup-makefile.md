@@ -11,12 +11,24 @@ description: 建立或更新 Makefile，包含虛擬環境管理
 
 ## 📋 執行步驟
 
-### 1. 檢查現有 Makefile
+### 1. 讀取技術棧設定
+// turbo
+```bash
+cat docs/tech-stack.md
+```
+
+根據 `docs/tech-stack.md` 的內容，判斷：
+- 是否使用 Python 後端（決定是否包含 backend-* 指令）
+- 是否使用前端框架（決定是否包含 frontend-* 指令）
+- 前端框架類型（Astro/Vue/React - 決定 dev server 指令）
+- 後端框架類型（FastAPI/Django - 決定啟動指令）
+
+### 2. 檢查現有 Makefile
 檢查專案根目錄是否已有 Makefile。
 - 如果存在，詢問使用者是否要備份（建立 `Makefile.backup`）
 - 如果不存在，直接建立新的
 
-### 2. 建立完整的 Makefile
+### 3. 建立完整的 Makefile
 在專案根目錄建立 `Makefile`，包含以下功能：
 
 #### 變數定義

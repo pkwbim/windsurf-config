@@ -90,12 +90,15 @@ if "Python" in tech_stack or "python" in tech_stack:
         Path(d).mkdir(parents=True, exist_ok=True)
         print(f"✅ {d}")
     
-    # 建立 __init__.py
+    # 建立 __init__.py（只在純 Python 目錄）
+    # 注意：不在 src/contracts/ 和 src/apps/ 建立，因為它們是多語言目錄
     init_files = [
-        "src/contracts/__init__.py",
+        # contracts/python/ - Python 專用契約
         "src/contracts/python/__init__.py",
         "src/contracts/python/dto/__init__.py",
         "src/contracts/python/interfaces/__init__.py",
+        
+        # core/ - DDD 核心層（純 Python）
         "src/core/__init__.py",
         "src/core/domain/__init__.py",
         "src/core/domain/entities/__init__.py",
@@ -106,7 +109,8 @@ if "Python" in tech_stack or "python" in tech_stack:
         "src/core/infrastructure/mocks/__init__.py",
         "src/core/application/__init__.py",
         "src/core/application/services/__init__.py",
-        "src/apps/__init__.py",
+        
+        # apps/backend/ - Python FastAPI 應用
         "src/apps/backend/__init__.py",
         "src/apps/backend/routes/__init__.py",
     ]
