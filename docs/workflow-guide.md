@@ -1,0 +1,225 @@
+# 📚 Workflow 使用指南
+
+> 本文件說明如何使用 Monorepo 初始化相關的 workflows。
+
+---
+
+## 🎯 快速參考
+
+| Workflow | 用途 | 何時使用 |
+|----------|------|----------|
+| `/init` | 引導流程入口 | **第一次使用時從這裡開始** |
+| `/setup-project-info` | 建立非技術目錄 | 新專案初始化 |
+| `/setup-techstack` | 設定技術棧 | 新專案或更換技術棧 |
+| `/setup-structure` | 建立 src/ 目錄 | 新專案或重建目錄 |
+| `/setup-agents` | 建立 AGENTS.md | 新專案或更新規範 |
+| `/setup-makefile` | 建立 Makefile | 需要開發環境指令 |
+
+---
+
+## 🚀 新專案初始化
+
+### 方法 1：使用引導流程（推薦）
+
+```
+/init
+```
+
+系統會引導你選擇適合的初始化路徑。
+
+### 方法 2：手動按順序執行
+
+```
+/setup-project-info    # 1. 建立目錄
+/setup-techstack       # 2. 設定技術棧（會停下來等你回答）
+/setup-structure       # 3. 建立 src/
+/setup-agents          # 4. 建立 AGENTS.md
+/setup-makefile        # 5. 建立 Makefile
+```
+
+---
+
+## 📋 各 Workflow 詳細說明
+
+### `/init` - 引導流程入口
+
+**用途**：不確定從哪開始時使用
+
+**功能**：
+- 檢查目前專案狀態
+- 引導選擇適合的初始化路徑
+- 提供狀態檢查
+
+**選項**：
+- `[A]` 全新專案 → 執行 1-5
+- `[B]` 已有目錄，只需設定技術棧 → 執行 2-4
+- `[C]` 只更新 AGENTS.md → 執行 4
+- `[D]` 只建立 Makefile → 執行 5
+- `[E]` 查看目前狀態
+
+---
+
+### `/setup-project-info` - 建立非技術目錄
+
+**用途**：建立專案的非技術相關目錄結構
+
+**建立的目錄**：
+```
+management/     # 私有經營層級
+pm/             # 產品管理
+policies/       # 公司規定
+enterprise/     # 企業版
+tools/          # 工具腳本
+scripts/        # 自動化腳本
+logs/           # 日誌
+out/            # 輸出
+discussions/    # 討論檔案
+docs/           # 文件
+src/            # 程式碼（空目錄）
+.windsurf/      # 配置
+```
+
+**建立的檔案**：
+- `AGENTS.md` - 最小版本（從模板複製）
+- `docs/README.md` - 文件目錄索引
+- `pm/planning/01_backlog.md`, `02_active.md`, `03_completed.md`
+
+**注意**：此階段不建立 `src/` 的子目錄
+
+---
+
+### `/setup-techstack` - 設定技術棧
+
+**用途**：透過問卷收集技術棧選擇
+
+**流程**：
+1. 建立討論檔案 `discussions/DISC-*-TechStackSetup.md`
+2. **停下來等你回答**
+3. 你回答後，寫入 `docs/tech-stack.md`
+
+**Preset 選項**：
+
+| # | 名稱 | 後端 | 前端 |
+|---|------|------|------|
+| 1 | fullstack-python-vue | Python + FastAPI | Vue 3 + Pinia |
+| 2 | fullstack-python-react | Python + FastAPI | React + Zustand |
+| 3 | fullstack-python-astro | Python + FastAPI | Astro + React |
+| 4 | backend-only | Python + FastAPI | 無 |
+| 5 | frontend-only | 無 | Vue 3 + Pinia |
+
+**輸出**：`docs/tech-stack.md`
+
+---
+
+### `/setup-structure` - 建立 src/ 目錄
+
+**用途**：根據技術棧建立程式碼目錄結構
+
+**前置條件**：`docs/tech-stack.md` 必須存在
+
+**建立的目錄**：
+```
+src/
+├── contracts/          # 共享契約
+│   ├── schemas/
+│   ├── enums/
+│   ├── errors/
+│   ├── python/         # 如果使用 Python
+│   └── typescript/     # 如果使用 TypeScript
+├── core/               # DDD 三層
+│   ├── domain/
+│   ├── infrastructure/
+│   └── application/
+└── apps/               # 介面層
+    ├── backend/        # 如果使用後端
+    ├── web/            # 如果使用前端
+    ├── cli/
+    └── desktop/
+```
+
+**動態調整**：
+- 根據技術棧決定建立哪些語言目錄
+- 前端目錄結構根據框架調整（Vue/React/Astro）
+
+---
+
+### `/setup-agents` - 建立 AGENTS.md
+
+**用途**：建立所有層級的 AGENTS.md 規範檔案
+
+**前置條件**：`docs/tech-stack.md` 必須存在
+
+**建立的檔案**：
+- `/AGENTS.md` - 全域規範
+- `src/AGENTS.md` - 程式碼層
+- `src/contracts/AGENTS.md` - 契約層
+- `src/core/AGENTS.md` - DDD 核心
+- `src/apps/AGENTS.md` - 介面層
+- `src/apps/backend/AGENTS.md` - 後端
+- `src/apps/web/AGENTS.md` - 前端
+- `pm/AGENTS.md` - 產品管理
+- `policies/AGENTS.md` - 政策文件
+- `scripts/AGENTS.md` - 自動化腳本
+
+**動態調整**：
+- 技術棧章節根據 `docs/tech-stack.md` 填入
+- 前端 AGENTS.md 根據框架調整內容
+
+---
+
+### `/setup-makefile` - 建立 Makefile
+
+**用途**：建立開發環境管理指令
+
+**建立的檔案**：
+- `Makefile` - 開發指令
+- `src/apps/backend/requirements.txt` - Python 依賴
+- `src/apps/web/package.json` - 前端依賴
+
+**主要指令**：
+```bash
+make help           # 顯示所有指令
+make dev            # 啟動前後端開發環境
+make install        # 安裝所有依賴
+make clean          # 清理建置產物
+
+make frontend-dev   # 只啟動前端
+make backend-dev    # 只啟動後端
+make venv-info      # 顯示虛擬環境資訊
+```
+
+---
+
+## 🔧 常見問題
+
+### Q: 執行順序可以跳過嗎？
+
+部分可以：
+- `/setup-structure` 和 `/setup-agents` 需要 `docs/tech-stack.md`
+- `/setup-makefile` 可以獨立執行
+
+### Q: 可以重複執行嗎？
+
+可以，所有 workflow 都是冪等的：
+- 已存在的檔案不會被覆蓋（除非明確說明）
+- 目錄會跳過已存在的
+
+### Q: 技術棧設定錯了怎麼辦？
+
+1. 重新執行 `/setup-techstack`
+2. 執行 `/setup-agents` 更新 AGENTS.md
+
+### Q: 如何查看目前狀態？
+
+執行 `/init` 並選擇 `[E]` 查看目前狀態。
+
+---
+
+## 📁 相關檔案
+
+| 檔案 | 用途 |
+|------|------|
+| `.windsurf/workflows/init.md` | 引導流程 |
+| `.windsurf/workflows/setup-*.md` | 各階段 workflow |
+| `.windsurf/templates/` | 模板檔案 |
+| `docs/tech-stack.md` | 技術棧設定（執行後產生） |

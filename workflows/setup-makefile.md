@@ -28,7 +28,93 @@ cat docs/tech-stack.md
 - 如果存在，詢問使用者是否要備份（建立 `Makefile.backup`）
 - 如果不存在，直接建立新的
 
-### 3. 建立完整的 Makefile
+### 3. 建立依賴檔案（根據技術棧）
+
+#### 3.1 建立後端 requirements.txt
+如果使用 Python 後端，建立 `src/apps/backend/requirements.txt`：
+
+**FastAPI 範例：**
+```txt
+fastapi==0.104.1
+uvicorn[standard]==0.24.0
+sqlalchemy==2.0.23
+pytest==7.4.3
+python-multipart==0.0.6
+```
+
+**Django 範例：**
+```txt
+django==4.2.7
+djangorestframework==3.14.0
+pytest-django==4.5.2
+```
+
+#### 3.2 建立前端 package.json
+如果使用前端框架，建立 `src/apps/web/package.json`：
+
+**Astro + React 範例：**
+```json
+{
+  "name": "web-app",
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "test": "vitest",
+    "format": "prettier --write .",
+    "lint": "eslint ."
+  },
+  "dependencies": {
+    "astro": "^4.0.0",
+    "@astrojs/react": "^3.0.0",
+    "@astrojs/tailwind": "^5.0.0",
+    "react": "^18.0.0",
+    "react-dom": "^18.0.0",
+    "zustand": "^4.4.0"
+  },
+  "devDependencies": {
+    "@types/react": "^18.0.0",
+    "@types/react-dom": "^18.0.0",
+    "prettier": "^3.0.0",
+    "eslint": "^8.0.0",
+    "tailwindcss": "^3.3.0",
+    "typescript": "^5.0.0",
+    "vitest": "^1.0.0",
+    "@playwright/test": "^1.40.0"
+  }
+}
+```
+
+**Vue 3 範例：**
+```json
+{
+  "name": "web-app",
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "test": "vitest",
+    "format": "prettier --write .",
+    "lint": "eslint ."
+  },
+  "dependencies": {
+    "vue": "^3.3.0",
+    "pinia": "^2.1.0"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^4.0.0",
+    "vite": "^5.0.0",
+    "typescript": "^5.0.0",
+    "vitest": "^1.0.0"
+  }
+}
+```
+
+### 4. 建立完整的 Makefile
 在專案根目錄建立 `Makefile`，包含以下功能：
 
 #### 變數定義

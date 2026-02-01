@@ -1,147 +1,133 @@
 ---
-description: 初始化專案根目錄（最小核心）
+description: 初始化 Monorepo 專案（引導流程）
 ---
 
-## 目的
+## 🎯 目的
 
-初始化一個全新專案的根目錄，建立最基本的檔案結構。
+這是 Monorepo 專案初始化的**入口 workflow**，引導你按正確順序執行各個初始化步驟。
 
-## 重要原則
+## 📚 使用說明
 
-- **最小核心**：只建立最基本的檔案
-- **空檔案優先**：README.md 和 AGENTS.md 建立為空檔案，內容用 `/discussion` 討論後填寫
-- **模組化擴展**：需要其他目錄時，使用對應的 `init-*` workflow
-
----
-
-## 工作流程步驟
-
-### 1. 確認執行位置
-// turbo
-```bash
-pwd
-ls -la
-```
-- 確認目前在正確的專案目錄
-- 檢查是否已有 `.git` 目錄或其他檔案
-
-### 2. 初始化 Git
-// turbo
-```bash
-git init
-```
-
-### 3. 建立 README.md
-建立空的 README.md 檔案：
-// turbo
-```bash
-touch README.md
-```
-
-### 4. 建立 AGENTS.md
-建立空的 AGENTS.md 檔案：
-// turbo
-```bash
-touch AGENTS.md
-```
-
-### 5. 建立 .gitignore
-建立標準的 .gitignore 檔案，內容如下：
-
-```
-# Dependencies
-node_modules/
-.venv/
-venv/
-__pycache__/
-*.pyc
-
-# Build outputs
-dist/
-build/
-out/
-*.egg-info/
-
-# Environment variables
-.env
-.env.local
-.env.*.local
-
-# IDE
-.idea/
-.vscode/
-*.swp
-*.swo
-.DS_Store
-
-# Logs
-logs/
-*.log
-npm-debug.log*
-
-# Test coverage
-coverage/
-.coverage
-htmlcov/
-
-# Temporary files
-tmp/
-temp/
-*.tmp
-```
-
-### 6. 初始提交
-// turbo
-```bash
-git add -A
-git commit -m "chore: init project with README.md, AGENTS.md, .gitignore"
-```
-
-### 7. 提示下一步
-
-告訴使用者：
-
-專案初始化完成！
-
-已建立：
-- README.md（空檔案）
-- AGENTS.md（空檔案）
-- .gitignore（標準忽略清單）
-- Git 倉庫已初始化
-
-下一步建議：
-
-1. **填寫專案說明**：執行 `/discussion` 討論 README.md 和 AGENTS.md 要寫什麼
-
-2. **按需初始化其他目錄**：
-   - `/init-discussions` - 建立 discussions/ 討論目錄
-   - `/init-planning` - 建立 _planning/ 專案規劃目錄
-   - `/init-docs` - 建立 docs/ 文件目錄
-   - `/init-scripts` - 建立 scripts/ + Makefile
-   - `/init-src` - 建立 src/ DDD 架構
-
-**然後停止，等待使用者指示。**
+詳細說明請參考：`.windsurf/docs/workflow-guide.md`
 
 ---
 
-## 建立的檔案清單
+## 📋 初始化流程
 
-| 檔案 | 說明 |
-|------|------|
-| README.md | 空檔案，專案說明 |
-| AGENTS.md | 空檔案，AI Agent 指引 |
-| .gitignore | 標準忽略清單 |
-| .git/ | Git 倉庫 |
+### 完整流程（5 個階段）
 
-## 成功標準
+| 順序 | Workflow | 用途 | 預估時間 |
+|------|----------|------|----------|
+| 1 | `/setup-project-info` | 建立非技術目錄 | 1 分鐘 |
+| 2 | `/setup-techstack` | 設定技術棧（需回答問卷） | 3-5 分鐘 |
+| 3 | `/setup-structure` | 建立 src/ 目錄結構 | 1 分鐘 |
+| 4 | `/setup-agents` | 建立 AGENTS.md | 2 分鐘 |
+| 5 | `/setup-makefile` | 建立 Makefile（可選） | 1 分鐘 |
 
-- Git 倉庫已初始化
-- 三個檔案已建立
-- 初始提交已完成
-- 已提示可用的 init-* workflows
+---
 
-## 注意事項
+## 🚀 快速開始
 
-- 此 workflow 假設在空目錄或新專案中執行
-- 如果目錄已有檔案，請先確認是否要覆蓋
-- README.md 和 AGENTS.md 的內容應透過 /discussion 討論後填寫
+請告訴我你的情況：
+
+### [A] 全新專案
+從頭開始，執行完整流程 1-5
+
+### [B] 已有目錄結構，只需設定技術棧
+執行 2-4（跳過目錄建立）
+
+### [C] 只更新 AGENTS.md
+執行 4（技術棧已設定）
+
+### [D] 只建立 Makefile
+執行 5
+
+### [E] 查看目前狀態
+檢查哪些步驟已完成
+
+---
+
+## 📊 狀態檢查
+
+執行以下指令檢查初始化狀態：
+
+// turbo
+```python
+from pathlib import Path
+
+checks = [
+    ("1. 非技術目錄", ["pm/planning", "policies", "management"]),
+    ("2. 技術棧設定", ["docs/tech-stack.md"]),
+    ("3. src/ 結構", ["src/core", "src/contracts", "src/apps"]),
+    ("4. AGENTS.md", ["AGENTS.md", "src/AGENTS.md"]),
+    ("5. Makefile", ["Makefile"]),
+]
+
+print("📊 專案初始化狀態\n")
+for name, paths in checks:
+    all_exist = all(Path(p).exists() for p in paths)
+    status = "✅" if all_exist else "❌"
+    print(f"{status} {name}")
+
+print("\n提示：選擇上方選項 [A-E] 開始初始化")
+```
+
+---
+
+## 📝 各階段說明
+
+### 階段 1：`/setup-project-info`
+建立非技術相關的目錄結構：
+- `management/` - 私有經營層級
+- `pm/` - 產品管理
+- `policies/` - 公司規定
+- `enterprise/` - 企業版
+- 其他輔助目錄
+
+### 階段 2：`/setup-techstack`
+透過問卷設定技術棧：
+- 選擇 Preset 或自訂
+- 設定後端（Python/FastAPI 等）
+- 設定前端（Vue/React/Astro 等）
+- 結果寫入 `docs/tech-stack.md`
+
+**⚠️ 此階段會停下來等你回答問卷**
+
+### 階段 3：`/setup-structure`
+根據技術棧建立 src/ 目錄：
+- `src/contracts/` - 共享契約
+- `src/core/` - DDD 三層架構
+- `src/apps/` - 介面層（backend, web）
+
+### 階段 4：`/setup-agents`
+建立所有 AGENTS.md 規範檔案：
+- 根目錄 AGENTS.md
+- 各層級 AGENTS.md
+- 內容根據技術棧動態調整
+
+### 階段 5：`/setup-makefile`（可選）
+建立 Makefile 和依賴檔案：
+- Python 虛擬環境管理
+- 前後端開發指令
+- `make dev` 一鍵啟動
+
+---
+
+## 🔧 故障排除
+
+### 問題：不確定從哪裡開始
+選擇 **[E] 查看目前狀態**，系統會告訴你哪些步驟已完成。
+
+### 問題：技術棧設定錯誤
+重新執行 `/setup-techstack`，然後執行 `/setup-agents` 更新 AGENTS.md。
+
+### 問題：目錄結構不對
+重新執行 `/setup-structure`，此 workflow 是冪等的。
+
+---
+
+## 📚 相關資源
+
+- `.windsurf/docs/workflow-guide.md` - 完整使用指南
+- `.windsurf/templates/` - 各種模板檔案
+- `docs/tech-stack.md` - 技術棧設定（執行階段 2 後產生）
