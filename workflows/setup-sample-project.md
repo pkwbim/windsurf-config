@@ -8,40 +8,13 @@ description: 建立 Hello World 範例專案（前後端串接、Zustand、Loggi
 
 ## 📋 前置條件
 
+- 已完成 `/setup-structure`（src/storage 目錄已建立）
 - 已完成 `/setup-makefile`（Makefile 和依賴檔案已建立）
 - 已安裝依賴（`make install`）
 
 ---
 
-## 步驟 1：建立 src/storage 目錄結構
-
-// turbo
-```bash
-python3 << 'EOF'
-from pathlib import Path
-
-storage_dirs = [
-    "src/storage/database",
-    "src/storage/logs",
-    "src/storage/cache",
-    "src/storage/uploads",
-    "src/storage/temp",
-]
-
-for d in storage_dirs:
-    Path(d).mkdir(parents=True, exist_ok=True)
-    gitkeep = Path(d) / ".gitkeep"
-    if not gitkeep.exists():
-        gitkeep.touch()
-    print(f"✅ {d}")
-
-print("\n📁 Storage 目錄結構建立完成")
-EOF
-```
-
----
-
-## 步驟 2：建立 .env.example 和 .env
+## 步驟 1：建立 .env.example 和 .env
 
 建立 `src/apps/backend/.env.example`：
 
@@ -77,7 +50,7 @@ NODE_ENV=development
 
 ---
 
-## 步驟 3：建立 Backend Hello World API
+## 步驟 2：建立 Backend Hello World API
 
 更新 `src/apps/backend/main.py`：
 
@@ -174,7 +147,7 @@ if __name__ == "__main__":
 
 ---
 
-## 步驟 4：更新 Backend requirements.txt
+## 步驟 3：更新 Backend requirements.txt
 
 新增 loguru 依賴：
 
@@ -192,9 +165,9 @@ loguru==0.7.2
 
 ---
 
-## 步驟 5：建立 Frontend 首頁
+## 步驟 4：建立 Frontend 首頁
 
-### 5.1 建立 Zustand Store
+### 4.1 建立 Zustand Store
 
 建立 `src/apps/web/src/stores/apiStore.ts`：
 
@@ -249,7 +222,7 @@ export const useApiStore = create<ApiStore>((set) => ({
 }));
 ```
 
-### 5.2 建立 React 元件
+### 4.2 建立 React 元件
 
 建立 `src/apps/web/src/components/HelloWorld.tsx`：
 
@@ -394,7 +367,7 @@ import { HelloWorld } from '../components/HelloWorld';
 
 ---
 
-## 步驟 6：更新 Makefile 加入 dev-remote
+## 步驟 5：更新 Makefile 加入 dev-remote
 
 在 Makefile 中加入 `dev-remote` 指令：
 
@@ -420,7 +393,7 @@ dev-remote: backend-install frontend-install
 
 ---
 
-## 步驟 7：驗證
+## 步驟 6：驗證
 
 // turbo
 ```bash

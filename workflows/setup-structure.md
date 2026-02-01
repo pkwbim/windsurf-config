@@ -61,6 +61,13 @@ core_directories = [
     # src/apps (介面層) - 基礎目錄
     "src/apps",
     
+    # src/storage (資料存儲目錄)
+    "src/storage/database",
+    "src/storage/logs",
+    "src/storage/cache",
+    "src/storage/uploads",
+    "src/storage/temp",
+    
     # src/logs (Log 輸出目錄)
     "src/logs/archive",
     
