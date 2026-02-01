@@ -1,0 +1,132 @@
+# Techstack Presets
+# 用於 /setup-techstack workflow
+
+presets:
+  1:
+    name: fullstack-python-vue
+    description: 漸進式框架，適合中小型 SPA、管理後台、內部工具
+    backend:
+      python_version: "3.10"
+      web_framework: "FastAPI"
+      orm: "SQLAlchemy"
+      database: "SQLite"
+      test_framework: "pytest"
+    frontend:
+      node_version: "22"
+      package_manager: "npm"
+      framework: "Vue 3"
+      state_management: "Pinia"
+      ui_framework: "shadcn-vue"
+      build_tool: "Vite"
+      test_framework: "Vitest"
+      e2e_test: "Playwright"
+    tools:
+      formatter_frontend: "Prettier"
+      formatter_backend: "Ruff"
+      linter_frontend: "ESLint"
+      linter_backend: "Ruff"
+      ci_cd: "GitHub Actions"
+      container: "Docker"
+    logging:
+      python: "loguru"
+      typescript: "winston"
+      rust: "tracing"
+
+  2:
+    name: fullstack-python-react
+    description: 生態系最大，適合需要豐富第三方套件的專案
+    backend:
+      python_version: "3.10"
+      web_framework: "FastAPI"
+      orm: "SQLAlchemy"
+      database: "SQLite"
+      test_framework: "pytest"
+    frontend:
+      node_version: "22"
+      package_manager: "npm"
+      framework: "React 19"
+      state_management: "Zustand"
+      ui_framework: "shadcn/ui"
+      build_tool: "Vite"
+      test_framework: "Vitest"
+      e2e_test: "Playwright"
+    tools:
+      formatter_frontend: "Prettier"
+      formatter_backend: "Ruff"
+      linter_frontend: "ESLint"
+      linter_backend: "Ruff"
+      ci_cd: "GitHub Actions"
+      container: "Docker"
+    logging:
+      python: "loguru"
+      typescript: "winston"
+      rust: "tracing"
+
+  3:
+    name: fullstack-python-astro
+    description: 內容導向網站、部落格、文件站、SEO 優先專案
+    backend:
+      python_version: "3.10"
+      web_framework: "FastAPI"
+      orm: "SQLAlchemy"
+      database: "SQLite"
+      test_framework: "pytest"
+    frontend:
+      node_version: "22"
+      package_manager: "npm"
+      framework: "Astro + React 19"
+      state_management: "Zustand"
+      ui_framework: "shadcn/ui"
+      build_tool: "Astro"
+      test_framework: "Vitest"
+      e2e_test: "Playwright"
+    tools:
+      formatter_frontend: "Prettier"
+      formatter_backend: "Ruff"
+      linter_frontend: "ESLint"
+      linter_backend: "Ruff"
+      ci_cd: "GitHub Actions"
+      container: "Docker"
+    logging:
+      python: "loguru"
+      typescript: "winston"
+      rust: "tracing"
+
+  4:
+    name: backend-only
+    description: 純 API 服務、微服務、CLI 工具
+    backend:
+      python_version: "3.10"
+      web_framework: "FastAPI"
+      orm: "SQLAlchemy"
+      database: "SQLite"
+      test_framework: "pytest"
+    frontend: null
+    tools:
+      formatter_backend: "Ruff"
+      linter_backend: "Ruff"
+      ci_cd: "GitHub Actions"
+      container: "Docker"
+    logging:
+      python: "loguru"
+
+  5:
+    name: frontend-only
+    description: 純靜態網站、使用外部 API 的前端專案
+    backend: null
+    frontend:
+      node_version: "22"
+      package_manager: "npm"
+      framework: "Vue 3"
+      state_management: "Pinia"
+      ui_framework: "shadcn-vue"
+      build_tool: "Vite"
+      test_framework: "Vitest"
+      e2e_test: "Playwright"
+    tools:
+      formatter_frontend: "Prettier"
+      linter_frontend: "ESLint"
+      ci_cd: "GitHub Actions"
+      container: "Docker"
+    logging:
+      typescript: "winston"
