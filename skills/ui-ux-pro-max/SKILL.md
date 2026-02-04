@@ -1,228 +1,288 @@
-# UI UX Pro Max
+# ui-ux-pro-max
 
-AI-powered design intelligence toolkit for building professional UI/UX across multiple platforms and frameworks.
+Comprehensive design guide for web and mobile applications. Contains 67 styles, 96 color palettes, 57 font pairings, 99 UX guidelines, and 25 chart types across 13 technology stacks. Searchable database with priority-based recommendations.
 
-## 🎯 What This Skill Does
+## Prerequisites
 
-Provides searchable databases of:
-- **100+ Product Types** - Industry-specific design recommendations
-- **67 UI Styles** - From glassmorphism to brutalism with AI prompts and CSS keywords
-- **96 Color Palettes** - Organized by product type and mood
-- **Font Pairings** - Curated typography with Google Fonts imports
-- **24 Landing Page Patterns** - Conversion-optimized structures
-- **Chart Types** - Data visualization recommendations
-- **UX Best Practices** - Guidelines and anti-patterns
+Check if Python is installed:
 
-## 🔍 Search Command
-
-### Domain Search
 ```bash
-python3 src/ui-ux-pro-max/scripts/search.py "<query>" --domain <domain> [-n <max_results>]
+python3 --version || python --version
 ```
 
-**Available Domains:**
-- `product` - Product type recommendations (SaaS, e-commerce, portfolio, etc.)
-- `style` - UI styles with AI prompts and CSS keywords
-- `typography` - Font pairings with Google Fonts imports
-- `color` - Color palettes by product type
-- `landing` - Page structure and CTA strategies
-- `chart` - Chart types and library recommendations
-- `ux` - Best practices and anti-patterns
+If Python is not installed, install it based on user's OS:
 
-**Examples:**
+**macOS:**
 ```bash
-# Find styles for a wellness app
-python3 src/ui-ux-pro-max/scripts/search.py "spa wellness" --domain style
-
-# Get color palettes for e-commerce
-python3 src/ui-ux-pro-max/scripts/search.py "e-commerce" --domain color
-
-# Find font pairings for luxury brand
-python3 src/ui-ux-pro-max/scripts/search.py "luxury elegant" --domain typography
+brew install python3
 ```
 
-### Stack-Specific Search
+**Ubuntu/Debian:**
 ```bash
-python3 src/ui-ux-pro-max/scripts/search.py "<query>" --stack <stack>
+sudo apt update && sudo apt install python3
 ```
 
-**Available Stacks:**
-- `html-tailwind` (default)
-- `react`, `nextjs`, `astro`
-- `vue`, `nuxtjs`, `nuxt-ui`
-- `svelte`, `sveltekit`
-- `shadcn`
-- `swiftui`, `react-native`, `flutter`, `jetpack-compose`
+**Windows:**
+```powershell
+winget install Python.Python.3.12
+```
+
+---
+
+## How to Use This Skill
+
+When user requests UI/UX work (design, build, create, implement, review, fix, improve), follow this workflow:
+
+### Step 1: Analyze User Requirements
+
+Extract key information from user request:
+- **Product type**: SaaS, e-commerce, portfolio, dashboard, landing page, etc.
+- **Style keywords**: minimal, playful, professional, elegant, dark mode, etc.
+- **Industry**: healthcare, fintech, gaming, education, etc.
+- **Stack**: React, Vue, Next.js, or default to `html-tailwind`
+
+### Step 2: Generate Design System (REQUIRED)
+
+**Always start with `--design-system`** to get comprehensive recommendations with reasoning:
+
+```bash
+python3 skills/ui-ux-pro-max/scripts/search.py "<product_type> <industry> <keywords>" --design-system [-p "Project Name"]
+```
+
+This command:
+1. Searches 5 domains in parallel (product, style, color, landing, typography)
+2. Applies reasoning rules from `ui-reasoning.csv` to select best matches
+3. Returns complete design system: pattern, style, colors, typography, effects
+4. Includes anti-patterns to avoid
 
 **Example:**
 ```bash
-# Get React-specific guidelines
-python3 src/ui-ux-pro-max/scripts/search.py "button component" --stack react
+python3 skills/ui-ux-pro-max/scripts/search.py "beauty spa wellness service" --design-system -p "Serenity Spa"
 ```
 
-### Auto-Detection
-Omit `--domain` to let the system auto-detect the domain:
+### Step 2b: Persist Design System (Master + Overrides Pattern)
+
+To save the design system for hierarchical retrieval across sessions, add `--persist`:
+
 ```bash
-python3 src/ui-ux-pro-max/scripts/search.py "minimalist design"
+python3 skills/ui-ux-pro-max/scripts/search.py "<query>" --design-system --persist -p "Project Name"
 ```
 
-## 🎨 Design System Generator
+This creates:
+- `design-system/MASTER.md` — Global Source of Truth with all design rules
+- `design-system/pages/` — Folder for page-specific overrides
 
-The flagship feature - generates complete, tailored design systems based on project requirements.
-
-**What It Generates:**
-- Landing page pattern (Hero-Centric, Feature-First, etc.)
-- UI style recommendation (Soft UI, Glassmorphism, etc.)
-- Color palette (Primary, Secondary, CTA, Background, Text)
-- Typography pairing with Google Fonts links
-- Key effects and animations
-- Anti-patterns to avoid
-- Pre-delivery checklist
-
-**Example Output:**
-```
-TARGET: Serenity Spa - RECOMMENDED DESIGN SYSTEM
-
-PATTERN: Hero-Centric + Social Proof
-  Conversion: Emotion-driven with trust elements
-  Sections: Hero → Services → Testimonials → Booking → Contact
-
-STYLE: Soft UI Evolution
-  Keywords: Soft shadows, subtle depth, calming, premium feel
-  Best For: Wellness, beauty, lifestyle brands
-
-COLORS:
-  Primary:    #E8B4B8 (Soft Pink)
-  Secondary:  #A8D5BA (Sage Green)
-  CTA:        #D4AF37 (Gold)
-  Background: #FFF5F5 (Warm White)
-  Text:       #2D3436 (Charcoal)
-
-TYPOGRAPHY: Cormorant Garamond / Montserrat
-  Mood: Elegant, calming, sophisticated
-  Google Fonts: https://fonts.google.com/share?selection.family=...
-
-PRE-DELIVERY CHECKLIST:
-  [ ] No emojis as icons (use SVG: Heroicons/Lucide)
-  [ ] cursor-pointer on all clickable elements
-  [ ] Hover states with smooth transitions (150-300ms)
-  [ ] Text contrast 4.5:1 minimum
-  [ ] Responsive: 375px, 768px, 1024px, 1440px
-```
-
-## 📁 Architecture
-
-```
-.windsurf/skills/ui-ux-pro-max/
-├── SKILL.md                      # This file
-├── CLAUDE.md                     # Claude Code compatibility
-├── README.md                     # Full documentation
-├── src/ui-ux-pro-max/            # Source of Truth
-│   ├── data/                     # CSV databases
-│   │   ├── products.csv          # 100+ product types
-│   │   ├── styles.csv            # 67 UI styles
-│   │   ├── colors.csv            # 96 color palettes
-│   │   ├── typography.csv        # Font pairings
-│   │   ├── landing.csv           # Landing page patterns
-│   │   ├── charts.csv            # Chart types
-│   │   ├── ux.csv                # UX guidelines
-│   │   └── stacks/               # Stack-specific guidelines
-│   ├── scripts/
-│   │   ├── search.py             # CLI entry point
-│   │   ├── core.py               # BM25 + regex search engine
-│   │   └── design_system.py      # Design system generator
-│   └── templates/
-│       ├── base/                 # Base templates
-│       └── platforms/            # Platform configs
-└── cli/                          # NPM CLI installer (uipro-cli)
-```
-
-## 🚀 Usage Workflow
-
-### 1. Search for Design Elements
+**With page-specific override:**
 ```bash
-# Find UI style
-python3 src/ui-ux-pro-max/scripts/search.py "modern minimalist" --domain style
-
-# Find color palette
-python3 src/ui-ux-pro-max/scripts/search.py "fintech" --domain color
-
-# Find typography
-python3 src/ui-ux-pro-max/scripts/search.py "professional corporate" --domain typography
+python3 skills/ui-ux-pro-max/scripts/search.py "<query>" --design-system --persist -p "Project Name" --page "dashboard"
 ```
 
-### 2. Generate Design System
-Use the search results to inform your design decisions, or let the system generate a complete design system based on the project type.
+This also creates:
+- `design-system/pages/dashboard.md` — Page-specific deviations from Master
 
-### 3. Apply to Your Stack
-Use stack-specific search to get implementation guidelines:
+**How hierarchical retrieval works:**
+1. When building a specific page (e.g., "Checkout"), first check `design-system/pages/checkout.md`
+2. If the page file exists, its rules **override** the Master file
+3. If not, use `design-system/MASTER.md` exclusively
+
+### Step 3: Supplement with Detailed Searches (as needed)
+
+After getting the design system, use domain searches to get additional details:
+
 ```bash
-python3 src/ui-ux-pro-max/scripts/search.py "button styles" --stack react
+python3 skills/ui-ux-pro-max/scripts/search.py "<keyword>" --domain <domain> [-n <max_results>]
 ```
 
-## 🔧 Prerequisites
+**When to use detailed searches:**
 
-- Python 3.x (no external dependencies required)
-- The search engine uses BM25 ranking + regex matching
+| Need | Domain | Example |
+|------|--------|---------|
+| More style options | `style` | `--domain style "glassmorphism dark"` |
+| Chart recommendations | `chart` | `--domain chart "real-time dashboard"` |
+| UX best practices | `ux` | `--domain ux "animation accessibility"` |
+| Alternative fonts | `typography` | `--domain typography "elegant luxury"` |
+| Landing structure | `landing` | `--domain landing "hero social-proof"` |
 
-## 📝 Key Features
+### Step 4: Stack Guidelines (Default: html-tailwind)
 
-### Intelligent Search
-- **BM25 Ranking** - Industry-standard text search algorithm
-- **Regex Matching** - Pattern-based keyword detection
-- **Auto-Detection** - Automatically determines search domain
-- **Multi-Domain** - Search across all databases simultaneously
+Get implementation-specific best practices. If user doesn't specify a stack, **default to `html-tailwind`**.
 
-### Design Intelligence
-- **Product-Aware** - Recommendations based on industry and product type
-- **Style Matching** - AI prompts and CSS keywords for each style
-- **Color Psychology** - Palettes organized by mood and product type
-- **Typography Pairing** - Pre-tested font combinations with Google Fonts
-- **Conversion-Optimized** - Landing page patterns proven to convert
+```bash
+python3 skills/ui-ux-pro-max/scripts/search.py "<keyword>" --stack html-tailwind
+```
 
-### Stack Support
-- **Multi-Framework** - Support for 13+ frameworks and platforms
-- **Best Practices** - Stack-specific guidelines and patterns
-- **Component Libraries** - Integration with shadcn, Nuxt UI, etc.
+Available stacks: `html-tailwind`, `react`, `nextjs`, `vue`, `svelte`, `swiftui`, `react-native`, `flutter`, `shadcn`, `jetpack-compose`
 
-## ⚠️ Important Notes
+---
 
-1. **Source of Truth**: Always edit files in `src/ui-ux-pro-max/`, not in CLI assets
-2. **No External Dependencies**: Pure Python 3.x, no pip install needed
-3. **Search Results**: Use `-n` flag to limit results (default varies by domain)
-4. **Design System**: Generated systems are starting points - customize for your needs
+## Search Reference
 
-## 🔗 Related Resources
+### Available Domains
 
-- **Full Documentation**: See `README.md` for complete feature list
-- **CLI Tool**: `npm install -g uipro-cli` for easy installation
-- **GitHub**: https://github.com/nextlevelbuilder/ui-ux-pro-max-skill
+| Domain | Use For | Example Keywords |
+|--------|---------|------------------|
+| `product` | Product type recommendations | SaaS, e-commerce, portfolio, healthcare, beauty, service |
+| `style` | UI styles, colors, effects | glassmorphism, minimalism, dark mode, brutalism |
+| `typography` | Font pairings, Google Fonts | elegant, playful, professional, modern |
+| `color` | Color palettes by product type | saas, ecommerce, healthcare, beauty, fintech, service |
+| `landing` | Page structure, CTA strategies | hero, hero-centric, testimonial, pricing, social-proof |
+| `chart` | Chart types, library recommendations | trend, comparison, timeline, funnel, pie |
+| `ux` | Best practices, anti-patterns | animation, accessibility, z-index, loading |
+| `react` | React/Next.js performance | waterfall, bundle, suspense, memo, rerender, cache |
+| `web` | Web interface guidelines | aria, focus, keyboard, semantic, virtualize |
+| `prompt` | AI prompts, CSS keywords | (style name) |
 
-## 📊 Database Stats
+### Available Stacks
 
-- **100** Product type recommendations
-- **67** UI styles with AI prompts
-- **96** Color palettes
-- **24** Landing page patterns
-- **13+** Supported frameworks/platforms
-- **100+** UX best practices and anti-patterns
+| Stack | Focus |
+|-------|-------|
+| `html-tailwind` | Tailwind utilities, responsive, a11y (DEFAULT) |
+| `react` | State, hooks, performance, patterns |
+| `nextjs` | SSR, routing, images, API routes |
+| `vue` | Composition API, Pinia, Vue Router |
+| `svelte` | Runes, stores, SvelteKit |
+| `swiftui` | Views, State, Navigation, Animation |
+| `react-native` | Components, Navigation, Lists |
+| `flutter` | Widgets, State, Layout, Theming |
+| `shadcn` | shadcn/ui components, theming, forms, patterns |
+| `jetpack-compose` | Composables, Modifiers, State Hoisting, Recomposition |
 
-## 🎯 When to Use This Skill
+---
 
-Use this skill when you need to:
-- Choose a UI style for a new project
-- Find color palettes that match your product type
-- Get font pairing recommendations
-- Design a landing page structure
-- Select appropriate chart types for data visualization
-- Follow UX best practices
-- Get stack-specific implementation guidelines
-- Generate a complete design system quickly
+## Example Workflow
 
-## 💡 Pro Tips
+**User request:** "Làm landing page cho dịch vụ chăm sóc da chuyên nghiệp"
 
-1. **Start with Product Type**: Search by product type first to get industry-specific recommendations
-2. **Combine Searches**: Use multiple domain searches to build a complete design system
-3. **Check Anti-Patterns**: Always review the "avoid" section to prevent common mistakes
-4. **Use Stack Search**: Get implementation details specific to your framework
-5. **Customize Results**: Treat search results as starting points, not final solutions
+### Step 1: Analyze Requirements
+- Product type: Beauty/Spa service
+- Style keywords: elegant, professional, soft
+- Industry: Beauty/Wellness
+- Stack: html-tailwind (default)
+
+### Step 2: Generate Design System (REQUIRED)
+
+```bash
+python3 skills/ui-ux-pro-max/scripts/search.py "beauty spa wellness service elegant" --design-system -p "Serenity Spa"
+```
+
+**Output:** Complete design system with pattern, style, colors, typography, effects, and anti-patterns.
+
+### Step 3: Supplement with Detailed Searches (as needed)
+
+```bash
+# Get UX guidelines for animation and accessibility
+python3 skills/ui-ux-pro-max/scripts/search.py "animation accessibility" --domain ux
+
+# Get alternative typography options if needed
+python3 skills/ui-ux-pro-max/scripts/search.py "elegant luxury serif" --domain typography
+```
+
+### Step 4: Stack Guidelines
+
+```bash
+python3 skills/ui-ux-pro-max/scripts/search.py "layout responsive form" --stack html-tailwind
+```
+
+**Then:** Synthesize design system + detailed searches and implement the design.
+
+---
+
+## Output Formats
+
+The `--design-system` flag supports two output formats:
+
+```bash
+# ASCII box (default) - best for terminal display
+python3 skills/ui-ux-pro-max/scripts/search.py "fintech crypto" --design-system
+
+# Markdown - best for documentation
+python3 skills/ui-ux-pro-max/scripts/search.py "fintech crypto" --design-system -f markdown
+```
+
+---
+
+## Tips for Better Results
+
+1. **Be specific with keywords** - "healthcare SaaS dashboard" > "app"
+2. **Search multiple times** - Different keywords reveal different insights
+3. **Combine domains** - Style + Typography + Color = Complete design system
+4. **Always check UX** - Search "animation", "z-index", "accessibility" for common issues
+5. **Use stack flag** - Get implementation-specific best practices
+6. **Iterate** - If first search doesn't match, try different keywords
+
+---
+
+## Common Rules for Professional UI
+
+These are frequently overlooked issues that make UI look unprofessional:
+
+### Icons & Visual Elements
+
+| Rule | Do | Don't |
+|------|----|----- |
+| **No emoji icons** | Use SVG icons (Heroicons, Lucide, Simple Icons) | Use emojis like 🎨 🚀 ⚙️ as UI icons |
+| **Stable hover states** | Use color/opacity transitions on hover | Use scale transforms that shift layout |
+| **Correct brand logos** | Research official SVG from Simple Icons | Guess or use incorrect logo paths |
+| **Consistent icon sizing** | Use fixed viewBox (24x24) with w-6 h-6 | Mix different icon sizes randomly |
+
+### Interaction & Cursor
+
+| Rule | Do | Don't |
+|------|----|----- |
+| **Cursor pointer** | Add `cursor-pointer` to all clickable/hoverable cards | Leave default cursor on interactive elements |
+| **Hover feedback** | Provide visual feedback (color, shadow, border) | No indication element is interactive |
+| **Smooth transitions** | Use `transition-colors duration-200` | Instant state changes or too slow (>500ms) |
+
+### Light/Dark Mode Contrast
+
+| Rule | Do | Don't |
+|------|----|----- |
+| **Glass card light mode** | Use `bg-white/80` or higher opacity | Use `bg-white/10` (too transparent) |
+| **Text contrast light** | Use `#0F172A` (slate-900) for text | Use `#94A3B8` (slate-400) for body text |
+| **Muted text light** | Use `#475569` (slate-600) minimum | Use gray-400 or lighter |
+| **Border visibility** | Use `border-gray-200` in light mode | Use `border-white/10` (invisible) |
+
+### Layout & Spacing
+
+| Rule | Do | Don't |
+|------|----|----- |
+| **Floating navbar** | Add `top-4 left-4 right-4` spacing | Stick navbar to `top-0 left-0 right-0` |
+| **Content padding** | Account for fixed navbar height | Let content hide behind fixed elements |
+| **Consistent max-width** | Use same `max-w-6xl` or `max-w-7xl` | Mix different container widths |
+
+---
+
+## Pre-Delivery Checklist
+
+Before delivering UI code, verify these items:
+
+### Visual Quality
+- [ ] No emojis used as icons (use SVG instead)
+- [ ] All icons from consistent icon set (Heroicons/Lucide)
+- [ ] Brand logos are correct (verified from Simple Icons)
+- [ ] Hover states don't cause layout shift
+- [ ] Use theme colors directly (bg-primary) not var() wrapper
+
+### Interaction
+- [ ] All clickable elements have `cursor-pointer`
+- [ ] Hover states provide clear visual feedback
+- [ ] Transitions are smooth (150-300ms)
+- [ ] Focus states visible for keyboard navigation
+
+### Light/Dark Mode
+- [ ] Light mode text has sufficient contrast (4.5:1 minimum)
+- [ ] Glass/transparent elements visible in light mode
+- [ ] Borders visible in both modes
+- [ ] Test both modes before delivery
+
+### Layout
+- [ ] Floating elements have proper spacing from edges
+- [ ] No content hidden behind fixed navbars
+- [ ] Responsive at 375px, 768px, 1024px, 1440px
+- [ ] No horizontal scroll on mobile
+
+### Accessibility
+- [ ] All images have alt text
+- [ ] Form inputs have labels
+- [ ] Color is not the only indicator
+- [ ] `prefers-reduced-motion` respected
