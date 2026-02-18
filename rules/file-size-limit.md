@@ -1,6 +1,6 @@
 ---
 trigger: glob
-glob: "src/**/*.{py,ts,tsx,js,jsx,vue,rs}"
+glob: "src/**/*.{php,py,ts,tsx,js,jsx,vue,rs}"
 ---
 
 # 📏 檔案大小限制
