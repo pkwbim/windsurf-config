@@ -10,6 +10,7 @@
 |----------|------|----------|
 | `/discussion` | 純討論與澄清流程 | 需要釐清需求、做決策、討論方向時 |
 | `/plan` | 將想法轉換為規格 | 要開始一個新 story 時 |
+| `/build-laravel-ui` | 純 UI 開發（Laravel + Inertia + Vue 3） | Laravel 專案 story 的第一階段 |
 | `/init` | 引導流程入口 | **第一次使用時從這裡開始** |
 | `/setup-project-info` | 建立非技術目錄 | 新專案初始化 |
 | `/setup-techstack` | 設定技術棧 | 新專案或更換技術棧 |
@@ -101,6 +102,43 @@ pm/planning/stories/
 - `02_active.md` 只作為指標（front matter + 一行說明），詳細規格在 `spec.md`
 - story 執行期間的 `/discussion` 問卷放在 story 目錄的 `discussions/` 下
 - 每次只有一個 story 進行中
+
+---
+
+### `/build-laravel-ui` - 純 UI 開發（Laravel + Inertia + Vue 3）
+
+**用途**：開發 Vue 3 前端頁面與元件，使用假資料確認 UI 設計，適用於 Laravel 12 + Inertia.js + Vue 3 技術棧。
+
+**前置條件**：
+- 已在 feature 分支
+- `pm/planning/02_active.md` 有 `active_story`
+- story 目錄下有 `spec.md`（含 Frontend 章節）
+
+**目錄結構**：
+```
+resources/js/
+├── Layouts/              # 版型元件
+├── Pages/                # 頁面元件（Inertia 頁面）
+├── Components/           # 共用元件
+└── mocks/{story-id}/     # 假資料（集中管理）
+```
+
+**流程**：
+1. 確認前置條件（git branch、active story）
+2. 讀取 `spec.md` 分析 UI 需求
+3. 建立 `resources/js/mocks/{story-id}/` 假資料檔案
+4. 建立 Vue 元件與頁面
+5. 在 `routes/web.php` 新增路由（回傳假資料）
+6. 執行 `make start` 啟動開發伺服器
+7. 更新 `checklist.md`（勾選完成項目）
+8. 通知使用者驗證，等待確認
+9. 確認通過後 commit，提示下一步
+
+**下一步**：`/build-laravel-contract`（尚未建立，待後續建立）
+
+**不適用場景**：
+- 純 Backend 功能 → 使用 `/build-laravel`
+- React/TypeScript 專案 → 使用 `/build-ui`
 
 ---
 
