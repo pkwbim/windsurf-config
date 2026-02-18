@@ -16,15 +16,17 @@ description: /plan workflow 的專業知識包。提供 Use Case 格式規範、
 ```
 STORY-001-CamelCaseDesc/
 ├── use-cases.md          # 1. Use Case 清單（先產生，確認後再繼續）
-├── business-rules.md     # 2. 業務規則（與 spec.md 同時產生）
-├── spec.md               # 3. 技術規格（與 business-rules.md 同時產生）
+├── business-rules.md     # 2. 業務規則（確認後同時產生）
+├── spec.md               # 3. 技術規格（確認後同時產生）
+├── checklist.md          # 4. 開發進度追蹤（確認後同時產生）
+├── e2e-scenarios.md      # 5. E2E 測試劇本（確認後同時產生）
 ├── discussions/          # 此 story 的討論問卷
 └── decisions/            # 此 story 的決策文件
 ```
 
 **執行順序：**
 1. 產生 `use-cases.md` → 等待使用者確認
-2. 確認後，同時產生 `business-rules.md` 和 `spec.md`
+2. 確認後，同時產生 `business-rules.md`、`spec.md`、`checklist.md`、`e2e-scenarios.md`
 
 ---
 
@@ -245,6 +247,14 @@ STORY-001-CamelCaseDesc/
 - 問：「這個功能屬於哪個業務領域？」
 - 常見領域：Identity（身份認證）、Order（訂單）、Product（產品）、Payment（付款）
 - 一個 story 通常只涉及 1-2 個 Bounded Context
+- **跨 BC 依賴分析**：
+  - 問：「這個 BC 需要從其他 BC 取得資料嗎？」→ 依賴關係
+  - 問：「這個 BC 的事件會影響其他 BC 嗎？」→ 被依賴關係
+  - 溝通方式選擇：
+    - **Domain Event**：非同步通知（如 `UserRegistered`、`OrderPlaced`）
+    - **ACL（Anti-Corruption Layer）**：轉換外部 BC 的模型，避免污染本 BC
+    - **Shared Kernel**：兩個 BC 共用少量模型（謹慎使用）
+  - 若無跨 BC 依賴：明確記錄「無」，避免未來誤解
 
 ### 步驟 2：識別 Aggregate Root
 - 問：「這個功能的核心業務物件是什麼？」
@@ -285,3 +295,62 @@ STORY-001-CamelCaseDesc/
 - [ ] 狀態轉換是否有完整的規則定義？
 - [ ] 業務限制（如數量上限）是否都已列出？
 - [ ] 每條規則都有明確的錯誤訊息？
+
+---
+
+## 🎭 E2E 測試劇本規範（e2e-scenarios.md）
+
+### 文件目的
+描述使用者在瀏覽器上的操作流程，供 Playwright 測試程式開發使用。
+每個劇本對應一個 `test()` 區塊。
+
+### 劇本來源對應
+
+| 劇本類型 | 來源 | 說明 |
+|----------|------|------|
+| 正向劇本 | `use-cases.md` 主要流程 | 每個 UC 至少一個 happy path |
+| 替代劇本 | `use-cases.md` 替代流程 | 有替代流程時產生 |
+| 負向劇本 | `use-cases.md` 例外流程 + `business-rules.md` | 錯誤輸入、業務規則違反 |
+
+### 劇本格式
+```markdown
+### S-{序號}：[劇本標題]
+
+| 欄位 | 內容 |
+|------|------|
+| **對應 UC / BR** | UC-01 / BR-01 |
+| **Actor** | [角色] |
+| **前置條件** | [測試開始前的系統狀態] |
+
+**操作步驟：**
+1. 前往 `[URL]`
+2. [操作描述]
+3. [操作描述]
+
+**預期結果：**
+- [可驗證的結果，如：URL 變為 `/dashboard`]
+- [可驗證的結果，如：頁面出現文字「歡迎」]
+```
+
+### 劇本命名規則
+- 正向劇本：`S-01`、`S-02`...
+- 負向劇本：`S-E01`、`S-E02`...
+
+### 操作步驟撰寫原則
+- 每個步驟要具體、可執行（「點擊 id=submit 的按鈕」優於「點擊送出」）
+- 輸入值要明確（「輸入 `test@example.com`」優於「輸入 email」）
+- URL 使用 `spec.md` 路由表格中的實際路徑
+
+### 預期結果撰寫原則
+- 必須是可程式驗證的（URL、DOM 元素、文字內容）
+- 避免主觀描述（「頁面看起來正確」→ 改為「頁面標題為 XXX」）
+
+## ✅ E2E 劇本完整性檢查
+
+產生 `e2e-scenarios.md` 後，AI 應自動檢查：
+
+- [ ] 每個 UC 都有至少一個正向劇本？
+- [ ] 每個例外流程都有對應的負向劇本？
+- [ ] 每條業務規則（BR）都有對應的邊界值劇本？
+- [ ] 每個劇本的預期結果都是可程式驗證的？
+- [ ] 所有 URL 都來自 `spec.md` 的路由表格？

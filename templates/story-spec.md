@@ -16,7 +16,15 @@
 ### Bounded Context
 - **所屬領域**: [例如：Identity, Order, Product 等]
 - **Aggregate Root**: [聚合根名稱]
-- **領域語言**: [定義此功能的核心術語]
+- **領域語言**: [定義此功能的核心術語，如：User = 已驗證的帳號持有者]
+
+### BC 邊界與依賴
+| 關係 | 對象 BC | 溝通方式 | 說明 |
+|------|---------|----------|------|
+| 依賴 | [BC 名稱] | Domain Event / ACL / Shared Kernel | [說明，如：登入後發出 UserLoggedIn event] |
+| 被依賴 | [BC 名稱] | Domain Event / ACL / Shared Kernel | [說明] |
+
+> 若無跨 BC 依賴，填入「無」即可。
 
 ### Entities
 

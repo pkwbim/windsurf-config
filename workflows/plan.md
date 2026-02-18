@@ -86,13 +86,17 @@ cat docs/tech-stack.md
 3. 確認後：
    - 將子 Story 加入 `pm/planning/01_backlog.md`
    - 從 `pm/planning/01_backlog.md` 移除原 story（或標記為 `[已拆分]`）
-   - 執行 commit 記錄此次拆分：
+   - Commit 並 merge 回 main（backlog 是共用資源，應在 main 上）：
      ```bash
      git add pm/planning/01_backlog.md
      git commit -m "plan: 拆分 [原 Story 標題] 為子 Story"
+     git checkout main
+     git merge [原 feature branch 名稱]
+     git push origin main
+     git branch -d [原 feature branch 名稱]
      ```
-   - 告訴使用者：「原 Story 已拆分完畢，子 Story 已加入 backlog。請選擇要先規劃哪個子 Story，再重新執行 `/plan`。」
-   - **停止，不繼續建立目錄或規格。不需要 merge 回 main（尚未開始實作）。**
+   - 告訴使用者：「原 Story 已拆分完畢，子 Story 已加入 backlog，並已 merge 回 main。請選擇要先規劃哪個子 Story，再重新執行 `/plan`（會從 main 建立新 branch）。」
+   - **停止，不繼續建立目錄或規格。**
 
 **如果規模合適：**繼續步驟 4。
 
@@ -169,6 +173,14 @@ cat docs/tech-stack.md
 依照 `.windsurf/templates/story-checklist.md` 格式，填入 Story ID 和標題。
 此文件追蹤開發進度，在後續 `/build`、`/review`、`/merge` 過程中持續更新。
 
+### 6d. e2e-scenarios.md
+依照 `.windsurf/templates/story-e2e-scenarios.md` 格式和 `plan` skill 的 E2E 劇本規範：
+- 從 `use-cases.md` 的主要流程 → 產生正向劇本（每個 UC 至少一個）
+- 從 `use-cases.md` 的例外流程 + `business-rules.md` → 產生負向劇本
+- 每個劇本的操作步驟要具體可執行，URL 來自 `spec.md` 路由表格
+- 預期結果必須是可程式驗證的（URL、DOM 元素、文字內容）
+- 參考 skill 的「E2E 劇本完整性檢查」自我檢查
+
 **Domain Design（參考 plan skill 的 DDD 分析方法）：**
 - 識別 Bounded Context 和 Aggregate Root
 - 設計 Entities（對應 BR 規則）
@@ -220,6 +232,11 @@ cat docs/tech-stack.md
 ✅/⚠️ 頁面/路由：[說明]
 ✅/⚠️ DB 設計：[說明]
 
+### E2E 劇本
+✅/⚠️ 正向劇本：[說明]
+✅/⚠️ 負向劇本：[說明]
+✅/⚠️ 預期結果可驗證：[說明]
+
 ### 發現的潛在遺漏
 1. [遺漏項目] - 建議：[立即加入 / 加入 backlog]
 ```
@@ -249,6 +266,7 @@ cat docs/tech-stack.md
 - 業務規則：`pm/planning/stories/STORY-XXX/business-rules.md`
 - 技術規格：`pm/planning/stories/STORY-XXX/spec.md`
 - 開發進度：`pm/planning/stories/STORY-XXX/checklist.md`
+- E2E 劇本：`pm/planning/stories/STORY-XXX/e2e-scenarios.md`
 
 當您想開始實作時，執行 `/build`。
 ```
