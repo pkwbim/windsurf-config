@@ -342,17 +342,19 @@ cd src/app && php artisan test --env=testing
 
 **停止並等待使用者確認。**
 
-### 10. 執行正式 DB Migration（驗收通過後）
+### 10. 確認正式 DB Migration（驗收通過後）
 
-收到確認後：
+收到確認後，確認正式 DB migration 狀態：
 
 ```bash
-cd src/app && php artisan migrate
+cd src/app && php artisan migrate:status
 ```
+
+- 若所有 migration 都是 `Ran` → 不需要執行，直接跳過
+- 若有新增的 migration 尚未執行 → 才需要執行 `php artisan migrate`
 
 更新 checklist：
 ```markdown
-- [x] **資料庫 Migration**（正式 DB）✅
 - [x] 人工驗證通過 ✅
 ```
 
