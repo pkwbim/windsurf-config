@@ -8,6 +8,7 @@
 
 | Workflow | 用途 | 何時使用 |
 |----------|------|----------|
+| `/discussion` | 純討論與澄清流程 | 需要釐清需求、做決策、討論方向時 |
 | `/init` | 引導流程入口 | **第一次使用時從這裡開始** |
 | `/setup-project-info` | 建立非技術目錄 | 新專案初始化 |
 | `/setup-techstack` | 設定技術棧 | 新專案或更換技術棧 |
@@ -42,6 +43,32 @@
 ---
 
 ## 📋 各 Workflow 詳細說明
+
+### `/discussion` - 純討論與澄清流程
+
+**用途**：需要釐清需求、做決策、或討論方向時使用。與其他 workflow 完全獨立。
+
+**依賴 Skill**：`.windsurf/skills/discussion/SKILL.md`
+
+**目錄結構**：
+```
+discussion/
+├── questionnaires/    # 問卷檔案（DISC-YYYYMMDDHHMM-{主題}.md）
+└── decisions/         # 結論文件（DEC-YYYYMMDDHHMM-{主題}.md）
+```
+
+**流程**：
+1. 載入 discussion skill 規範
+2. 判斷是否需要開問卷
+3. 建立問卷 → 等待使用者回答
+4. 讀取回答 → 判斷是否需要追問（同一問卷追加）或開新問卷
+5. 產生決策文件，更新問卷 status 為 `closed`
+
+**追問規則**：
+- 同一主題的追問 → 在**同一個問卷末尾**追加，不開新檔
+- 全新議題 → 開新問卷
+
+---
 
 ### `/init` - 引導流程入口
 
