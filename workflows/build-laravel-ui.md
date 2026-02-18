@@ -13,6 +13,22 @@ description: 階段 1 - 純 UI 開發（Laravel + Inertia.js + Vue 3，使用假
 
 ---
 
+## 🧠 相關 Skills
+
+執行此 workflow 時，以下 skills 會自動或手動被觸發，請確保遵循其規範：
+
+| Skill | 觸發時機 | 步驟 |
+|-------|---------|------|
+| `inertia-vue-development` | 建立 Vue 頁面元件、使用 `<Link>`、`useForm`、Inertia props | 步驟 4 |
+| `tailwindcss-development` | 加入 Tailwind CSS 樣式、響應式設計、dark mode | 步驟 4 |
+| `frontend-design` | 設計頁面視覺風格、UI 元件美化 | 步驟 4 |
+| `ui-ux-pro-max` | 需要 UI/UX 設計指引、色彩配置、字型搭配 | 步驟 4 |
+| `webapp-testing` | 使用 Playwright 驗證 UI 功能（可選） | 步驟 8 |
+
+> **注意**：`fluxui-development` 是 Livewire 專用，不適用於 Inertia + Vue 3。
+
+---
+
 ## 工作流程步驟
 
 ### 0. 確認前置條件
@@ -104,6 +120,12 @@ export const mockAuthUser: AuthUser = {
 
 ### 4. 建立 Vue 元件與頁面
 
+> 🧠 **此步驟啟用以下 Skills**：
+> - `inertia-vue-development`：Vue 頁面結構、`<Link>`、`useForm`、Inertia props 寫法
+> - `tailwindcss-development`：Tailwind CSS v4 樣式、響應式、dark mode
+> - `frontend-design`：頁面視覺設計方向、UI 美化
+> - `ui-ux-pro-max`：色彩配置、字型搭配、UX 指引
+
 **目錄結構（標準 Laravel Breeze）：**
 ```
 resources/js/
@@ -174,6 +196,8 @@ make start
 ```
 
 ### 8. 通知使用者驗證
+
+> 🧠 **可選 Skill**：`webapp-testing`（Playwright）— 若需要自動截圖或驗證 UI 行為，可使用此 skill。
 
 告訴使用者：
 
