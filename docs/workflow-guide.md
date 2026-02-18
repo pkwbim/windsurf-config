@@ -10,7 +10,8 @@
 |----------|------|----------|
 | `/discussion` | 純討論與澄清流程 | 需要釐清需求、做決策、討論方向時 |
 | `/plan` | 將想法轉換為規格 | 要開始一個新 story 時 |
-| `/build-laravel-ui` | 純 UI 開發（Laravel + Inertia + Vue 3） | Laravel 專案 story 的第一階段 |
+| `/build-laravel-ui` | 純 UI 開發（Laravel + Blade + Alpine.js） | Laravel 專案 story 的第一階段 |
+| `/build-laravel-contract` | Form Contract 設計（FormRequest + Controller 骨架） | UI 完成後，定義驗證規則和 Controller 行為 |
 | `/init` | 引導流程入口 | **第一次使用時從這裡開始** |
 | `/setup-project-info` | 建立非技術目錄 | 新專案初始化 |
 | `/setup-techstack` | 設定技術棧 | 新專案或更換技術棧 |
@@ -105,9 +106,9 @@ pm/planning/stories/
 
 ---
 
-### `/build-laravel-ui` - 純 UI 開發（Laravel + Inertia + Vue 3）
+### `/build-laravel-ui` - 純 UI 開發（Laravel + Blade + Alpine.js）
 
-**用途**：開發 Vue 3 前端頁面與元件，使用假資料確認 UI 設計，適用於 Laravel 12 + Inertia.js + Vue 3 技術棧。
+**用途**：開發 Blade 前端頁面，使用假資料確認 UI 設計，適用於 Laravel 12 + Blade + Tailwind CSS v4 + Alpine.js（MPA，SEO 友善）。
 
 **前置條件**：
 - 已在 feature 分支
@@ -116,29 +117,73 @@ pm/planning/stories/
 
 **目錄結構**：
 ```
-resources/js/
-├── Layouts/              # 版型元件
-├── Pages/                # 頁面元件（Inertia 頁面）
-├── Components/           # 共用元件
-└── mocks/{story-id}/     # 假資料（集中管理）
+resources/views/
+├── layouts/              # 版型（guest.blade.php、auth.blade.php）
+├── home.blade.php
+├── about.blade.php
+├── dashboard.blade.php
+├── auth/                 # 登入、註冊頁面
+└── profile/              # 個人資料頁面
 ```
 
 **流程**：
 1. 確認前置條件（git branch、active story）
 2. 讀取 `spec.md` 分析 UI 需求
-3. 建立 `resources/js/mocks/{story-id}/` 假資料檔案
-4. 建立 Vue 元件與頁面
-5. 在 `routes/web.php` 新增路由（回傳假資料）
+3. 建立 Blade 版型（`layouts/guest`、`layouts/auth`）
+4. 建立 Blade 頁面（假資料寫死在模板中）
+5. 在 `routes/web.php` 新增路由（closure 回傳 view）
 6. 執行 `make start` 啟動開發伺服器
 7. 更新 `checklist.md`（勾選完成項目）
 8. 通知使用者驗證，等待確認
 9. 確認通過後 commit，提示下一步
 
-**下一步**：`/build-laravel-contract`（尚未建立，待後續建立）
+**下一步**：`/build-laravel-contract`
 
 **不適用場景**：
 - 純 Backend 功能 → 使用 `/build-laravel`
-- React/TypeScript 專案 → 使用 `/build-ui`
+- SPA 架構（Inertia + Vue）→ 此專案不使用
+
+---
+
+### `/build-laravel-contract` - Form Contract 設計
+
+**用途**：UI 完成後，定義每個表單的 FormRequest 驗證規則、Controller 行為、Redirect 規則，作為 Backend 實作的規格起點。
+
+**前置條件**：
+- UI 階段已完成（`/build-laravel-ui` checklist 已勾選）
+- 已在 feature 分支
+
+**目錄結構**：
+```
+app/Http/
+├── Requests/             # FormRequest 驗證規則
+│   ├── Auth/
+│   └── Profile/
+└── Controllers/          # Controller 骨架（含 TODO 註解）
+    ├── Auth/
+    └── Profile/
+```
+
+**DDD 分層原則**：
+- 簡單 CRUD → 輕量版：`Controller → FormRequest → Eloquent Model`
+- 複雜業務邏輯 → 引入 `laravel-ddd` skill，使用完整分層
+
+**流程**：
+1. 確認前置條件
+2. 讀取 `spec.md` 分析表單需求
+3. 建立 FormRequest 骨架（驗證規則 + 错誤訊息）
+4. 建立 Controller 骨架（行為規格表 + TODO 註解）
+5. 更新路由（closure 改為指向 Controller，加入 Middleware）
+6. 可選：建立 Feature Test 骨架（`pest-testing` skill）
+7. 更新 `checklist.md`
+8. 通知使用者驗證，等待確認
+9. 確認通過後 commit，提示下一步
+
+**下一步**：`/build-laravel`（實作 Controller 邏輯和業務邏輯）
+
+**不適用場景**：
+- 純 API 專案（FastAPI/Node.js）→ 使用 `/build-contract`
+- 沒有表單的純展示頁面 → 可直接進入 `/build-laravel`
 
 ---
 
