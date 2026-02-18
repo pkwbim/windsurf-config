@@ -48,6 +48,18 @@ cat pm/planning/stories/AGENTS.md
 cat docs/tech-stack.md
 ```
 
+// turbo
+```bash
+cat pm/specs/README.md
+cat pm/specs/glossary.md
+```
+
+**讀取 pm/specs/ 的目的：**
+- 了解系統目前已有哪些 Bounded Context 和功能
+- 確認新 Story 是否與既有 Context 有依賴關係（Shared Kernel、跨 BC 呼叫）
+- 避免重複設計已存在的 Domain Model 或路由
+- 若新 Story 屬於既有 Context，讀取對應的 `pm/specs/{context}/` 目錄下所有檔案
+
 ---
 
 ## 步驟 2：與使用者確認故事選擇

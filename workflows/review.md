@@ -95,6 +95,10 @@ pm/specs/{context}/
 **更新 `pm/specs/glossary.md`：**
 - 若此 Story 引入新的領域術語，加入術語表
 
+**檢查 `pm/specs/AGENTS.md`：**
+- 讀取現有內容，確認格式規範和更新規則是否仍然正確
+- 若有新的 Context 類型或格式變更，更新對應說明
+
 ### 5. 更新 checklist.md
 勾選「文件更新完成」：
 ```markdown
