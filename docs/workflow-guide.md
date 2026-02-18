@@ -12,6 +12,7 @@
 | `/plan` | 將想法轉換為規格 | 要開始一個新 story 時 |
 | `/build-laravel-ui` | 純 UI 開發（Laravel + Blade + Alpine.js） | Laravel 專案 story 的第一階段 |
 | `/build-laravel-contract` | Form Contract 設計（FormRequest + Controller 骨架） | UI 完成後，定義驗證規則和 Controller 行為 |
+| `/build-laravel-backend` | Backend TDD 實作（Controller 邏輯 + Feature Test） | Contract 完成後，TDD 實作真實邏輯 |
 | `/init` | 引導流程入口 | **第一次使用時從這裡開始** |
 | `/setup-project-info` | 建立非技術目錄 | 新專案初始化 |
 | `/setup-techstack` | 設定技術棧 | 新專案或更換技術棧 |
@@ -179,11 +180,47 @@ app/Http/
 8. 通知使用者驗證，等待確認
 9. 確認通過後 commit，提示下一步
 
-**下一步**：`/build-laravel`（實作 Controller 邏輯和業務邏輯）
+**下一步**：`/build-laravel-backend`
 
 **不適用場景**：
 - 純 API 專案（FastAPI/Node.js）→ 使用 `/build-contract`
-- 沒有表單的純展示頁面 → 可直接進入 `/build-laravel`
+- 沒有表單的純展示頁面 → 可直接進入 `/build-laravel-backend`
+
+---
+
+### `/build-laravel-backend` - Backend TDD 實作
+
+**用途**：依據 Form Contract 的 FormRequest + Controller 骨架，使用 TDD 方式實作真實 Controller 邏輯。
+
+**前置條件**：
+- Form Contract 階段已完成（`/build-laravel-contract` checklist 已勾選）
+- `.env.testing` 已設定（使用專用測試 PostgreSQL DB）
+
+**測試策略**：
+- 簡單 CRUD → 只寫 Feature Test（測試 HTTP 層行為）
+- 複雜業務邏輯（如排盤計算）→ Feature Test + Unit Test
+
+**資料庫策略**：
+- 測試 DB：專用 PostgreSQL + `RefreshDatabase` trait（自動 migrate + 清空）
+- 正式 DB：驗收通過後才執行 `php artisan migrate`
+
+**流程**：
+1. 確認前置條件（`.env.testing` 設定）
+2. 讀取 FormRequest + Controller 骨架
+3. 建立 Feature Test（Red）
+4. 實作 Controller 邏輯（Green）
+5. 重構
+6. 確認 Blade 模板顯示錯誤/成功訊息
+7. 執行完整測試套件
+8. 更新 `checklist.md`
+9. 通知使用者驗證，等待確認
+10. 驗收通過後執行正式 DB Migration，commit
+
+**下一步**：`/merge`（合併到 main）或 `/review`（更新文件）
+
+**不適用場景**：
+- 純 API 專案（FastAPI/Node.js）→ 使用 `/build-backend`
+- 尚未完成 Form Contract → 先執行 `/build-laravel-contract`
 
 ---
 
