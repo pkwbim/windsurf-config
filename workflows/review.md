@@ -1,114 +1,145 @@
 ---
 description: Extract learnings from discussions and archive to docs (post-build)
-auto_execution_mode: 1
 ---
 
-## Purpose
-After completing a `/build`, run `/review` to preserve important technical decisions and learnings for future reference.
+## 🎯 目的
+每次 Story 完成後，執行 `/review` 以：
+1. 整理技術決策和學習心得 → `pm/docs/`
+2. **更新系統規格** → `pm/specs/`（永遠保持最新狀態）
+3. 更新 checklist 並 commit
 
-## Steps
+---
 
-### 1. Scan Knowledge Sources
+## 工作流程步驟
+
+### 1. 確認前置條件
 // turbo
 ```bash
-ls -la discussions/
-cat _planning/03_completed.md
+git branch --show-current
+cat pm/planning/02_active.md
 ```
-- Identify discussion files related to the completed Story
-- Review recently completed items in `03_completed.md` for design decisions
+- 確認 Backend 階段已完成（checklist 全部勾選）
+- 取得 active_story ID
 
-### 2. Extract Key Learnings
-**From `discussions/` files:**
-- Read the Q&A content
-- Identify **technical decisions** made
-- Identify **problems solved** and their solutions
-
-**From `03_completed.md` entries:**
-- Extract **設計決策** from the 學習心得 section
-- Identify **架構模式** that were established
-- Note **介面定義** (interfaces, types) that should be documented
-
-**General:**
-- Identify **patterns** that should be reused
-
-### 3. Update or Create Knowledge Doc
-- Check if a relevant doc exists in `docs/`
-- **IF EXISTS:** Append new learnings to the existing doc
-- **IF NEW TOPIC:** Create a new doc in `docs/` with format:
-  ```
-  # [Topic Title]
-  
-  ## Context
-  [When/why this knowledge is relevant]
-  
-  ## Key Decisions
-  - [Decision 1]: [Rationale]
-  - [Decision 2]: [Rationale]
-  
-  ## Common Issues & Solutions
-  | Issue | Solution |
-  |-------|----------|
-  | [Problem] | [Fix] |
-  
-  ## References
-  - Source: `discussions/[filename].md`
-  - Related Story: Story-XXX
-  ```
-
-### 4. Update Project Documentation
+### 2. 掃描知識來源
 // turbo
 ```bash
-cat CHANGELOG.md
-cat README.md
+ls pm/planning/stories/{active_story}/discussions/
+ls pm/planning/stories/{active_story}/decisions/
+cat pm/planning/stories/{active_story}/checklist.md
 ```
-- **CHANGELOG.md**: Add entry for the completed Story/Version
-  - Include new features, fixes, and changes
-- **README.md**: Update if there are new CLI commands, setup steps, or features
+- 讀取所有 decisions/ 文件，提取技術決策
+- 讀取 checklist 確認完成項目
 
-### 5. Update docs/README.md Index
+### 3. 更新技術知識文件（pm/docs/）
+- 檢查 `pm/docs/` 是否有相關主題的文件
+- **若已存在**：append 新的學習心得
+- **若是新主題**：建立新文件
+
+文件格式：
+```markdown
+# [主題標題]
+
+## Context
+[何時/為何此知識相關]
+
+## Key Decisions
+- [決策 1]：[理由]
+
+## Common Issues & Solutions
+| 問題 | 解法 |
+|------|------|
+
+## References
+- Related Story: STORY-XXX
+```
+
+### 4. 更新系統規格（pm/specs/）⭐ 重要
+
+> 此步驟確保 `pm/specs/` 永遠反映系統最新狀態。
+
 // turbo
 ```bash
-cat docs/README.md
+cat pm/planning/stories/{active_story}/spec.md
+ls pm/specs/
 ```
-- Add new doc to the index if created
 
-### 6. Complete & Archive Task
-// turbo
+**判斷此 Story 影響哪個 Bounded Context：**
+
+| Story 類型 | 對應 Context 目錄 |
+|-----------|-----------------|
+| UserAuth | `pm/specs/user-auth/` |
+| ProfileManagement | `pm/specs/profile-management/` |
+| AstrologyChart | `pm/specs/astrology-chart/` |
+| 新 Context | 建立新目錄 |
+
+**每個 Context 的目錄結構：**
+```
+pm/specs/{context}/
+├── spec.md          # 入口：功能摘要 + 連結
+├── use-cases.md     # Use Cases 詳細描述
+├── domain-model.md  # Entity、Value Object
+└── routes.md        # 路由對照表（含 FormRequest、Middleware）
+```
+
+**更新規則：**
+- `spec.md`：更新功能摘要、狀態、最後更新日期
+- `use-cases.md`：新增或修改 Use Case 描述
+- `domain-model.md`：新增或修改 Entity、Value Object、DB 欄位
+- `routes.md`：新增或修改路由、FormRequest、Middleware
+
+**若是全新 Context：**
+- 建立目錄和 4 個檔案
+- 更新 `pm/specs/README.md` 索引表
+
+**更新 `pm/specs/glossary.md`：**
+- 若此 Story 引入新的領域術語，加入術語表
+
+### 5. 更新 checklist.md
+勾選「文件更新完成」：
+```markdown
+- [x] 文件更新完成 (`/review`) ✅
+```
+
+### 6. Commit 所有變更
 ```bash
-cat .windsurf/templates/completed-task.md
-```
-- **INSERT** the filled template into `_planning/03_completed.md` under the `## 已完成項目` heading (top of the list)
-- **DO NOT** overwrite the file. Keep all existing completed items.
-- Update `_planning/03_completed.md` statistics if applicable
+git add pm/ && git commit -m "docs(review): {story-id} review 完成
 
-### 7. Archive Active Task
-Archive the completed task spec for future reference:
-// turbo
-```bash
-# Get Story ID from 02_active.md title
-STORY_ID=$(grep -oP 'Story-\d+' _planning/02_active.md | head -1)
-DATE=$(date +%Y%m%d)
-# Archive with date and story ID
-mkdir -p _planning/archived
-cp _planning/02_active.md "_planning/archived/${DATE}-${STORY_ID}-active.md"
-```
-- Then reset `02_active.md` to template state:
-// turbo
-```bash
-cp .windsurf/templates/story.md _planning/02_active.md
+- 更新 pm/docs/（技術知識文件）
+- 更新 pm/specs/{context}/（系統規格）"
 ```
 
-### 8. Archive Discussion (Optional)
-- Ask user: "Move processed discussions to `discussions/archived/`?"
-- If yes, move the files
+### 7. 提示下一步
+告知使用者：
+```
+✅ /review 完成！
 
-## Example Output
+## 更新內容
+- pm/docs/：[更新了哪些文件]
+- pm/specs/{context}/：[更新了哪些規格]
 
-After running `/review` on Story-001, you might create:
-- `docs/monorepo-architecture.md` - Core logic sharing patterns
-- `docs/esm-commonjs-compatibility.md` - Module format decisions
+## 下一步
+- 執行 `/merge` 合併到 main
+```
+
+---
+
+## pm/specs/ 目錄說明
+
+```
+pm/specs/
+├── README.md          # 索引：所有 Context 清單
+├── glossary.md        # DDD 術語表（通用 + 本專案）
+├── user-auth/         # Identity Bounded Context
+│   ├── spec.md
+│   ├── use-cases.md
+│   ├── domain-model.md
+│   └── routes.md
+└── {future-context}/
+    └── ...
+```
 
 ## Notes
-- Run this after every `/build` completion
-- Focus on **reusable knowledge**, not story-specific details
-- Keep docs concise and actionable
+- 每次 `/build` 完成後執行
+- `pm/specs/` 是系統的「活文件」，永遠反映最新實作狀態
+- 技術決策放 `pm/docs/`，系統規格放 `pm/specs/`
