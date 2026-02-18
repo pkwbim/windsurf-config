@@ -37,12 +37,15 @@ description: 純討論與澄清流程 - 產生問卷並等待回覆，與其他 
 
 ## 步驟 3：產生問卷檔案
 
-在 `discussions/questionnaires/` 建立新檔案，依照 discussion skill 的規範：
-
-**檔案路徑：**
-```
-discussions/questionnaires/DISC-YYYYMMDDHHMM-{主題}.md
-```
+**⚠️ 重要：判斷問卷放置位置**
+- **在 story 執行期間**（`02_active.md` 的 `active_story` 不為 null）：問卷放在 story 目錄的 `discussions/` 下
+  ```
+  pm/planning/stories/{active_story}/discussions/DISC-YYYYMMDDHHMM-{主題}.md
+  ```
+- **非 story 執行期間**（全域討論）：問卷放在全域目錄
+  ```
+  discussions/questionnaires/DISC-YYYYMMDDHHMM-{主題}.md
+  ```
 
 **必須包含 front matter（參考 skill 規範）**，然後依格式撰寫問題（3-5 個）。
 
@@ -53,7 +56,7 @@ discussions/questionnaires/DISC-YYYYMMDDHHMM-{主題}.md
 告訴使用者：
 
 ```
-我已建立問卷：`discussions/questionnaires/[檔案名稱]`
+我已建立問卷：`[問卷完整路徑]`
 
 請在檔案中各問題的「答：」後填寫回答。完成後，請告訴我「我已回答」。
 
@@ -96,12 +99,15 @@ cat discussions/questionnaires/[檔案名稱]
 
 ## 步驟 7：產生決策文件
 
-在 `discussions/decisions/` 建立結論文件，依照 discussion skill 的規範：
-
-**檔案路徑：**
-```
-discussions/decisions/DEC-YYYYMMDDHHMM-{主題}.md
-```
+**⚠️ 重要：決策文件放置位置與問卷相同**
+- **在 story 執行期間**：決策文件放在 story 目錄的 `decisions/` 下
+  ```
+  pm/planning/stories/{active_story}/decisions/DEC-YYYYMMDDHHMM-{主題}.md
+  ```
+- **非 story 執行期間**：放在全域目錄
+  ```
+  discussions/decisions/DEC-YYYYMMDDHHMM-{主題}.md
+  ```
 
 **必須包含 front matter**，`source_questionnaire` 填入對應問卷 ID。
 
@@ -135,6 +141,5 @@ discussions/decisions/DEC-YYYYMMDDHHMM-{主題}.md
 - ❌ 不要猜測答案就繼續執行
 - ❌ 不要在討論階段開始寫程式或修改檔案
 - ❌ 不要問太籠統的問題（例如「你想要什麼？」）
-- ❌ 不要一次問超過 5 個問題
 - ❌ 追問時不要開新問卷（除非是全新議題）
 - ❌ 不要把問卷存到 `discussions/`（舊路徑），要存到 `discussions/questionnaires/`

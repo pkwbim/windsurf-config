@@ -9,6 +9,7 @@
 | Workflow | 用途 | 何時使用 |
 |----------|------|----------|
 | `/discussion` | 純討論與澄清流程 | 需要釐清需求、做決策、討論方向時 |
+| `/plan` | 將想法轉換為規格 | 要開始一個新 story 時 |
 | `/init` | 引導流程入口 | **第一次使用時從這裡開始** |
 | `/setup-project-info` | 建立非技術目錄 | 新專案初始化 |
 | `/setup-techstack` | 設定技術棧 | 新專案或更換技術棧 |
@@ -67,6 +68,39 @@ discussion/
 **追問規則**：
 - 同一主題的追問 → 在**同一個問卷末尾**追加，不開新檔
 - 全新議題 → 開新問卷
+
+---
+
+### `/plan` - 將想法轉換為規格
+
+**用途**：將 backlog 中的 story 轉換為詳細技術規格，建立 story 獨立目錄。
+
+**依賴 Skill**：無（但若需要澄清，會呼叫 `/discussion`）
+
+**Story 目錄結構**：
+```
+pm/planning/stories/
+├── AGENTS.md                        # 所有 story 狀態總覽
+└── STORY-{流水號}-{CamelCase描述}/
+    ├── spec.md                       # 技術規格（主文件）
+    ├── discussions/                  # 此 story 的討論問卷
+    └── decisions/                    # 此 story 的決策文件
+```
+
+**流程**：
+1. 讀取 backlog、stories/AGENTS.md、模板
+2. 確認要規劃哪個 story
+3. 需求不清楚時執行 `/discussion`（問卷放在 story 目錄下）
+4. 建立 story 目錄（`STORY-{流水號}-{CamelCase描述}/`）
+5. 撰寫 `spec.md` 技術規格（DDD 導向）
+6. AI 自動檢查範圍完整性
+7. 更新 `stories/AGENTS.md` 狀態表格
+8. 停止，等待 `/build`
+
+**重要規則**：
+- `02_active.md` 只作為指標（front matter + 一行說明），詳細規格在 `spec.md`
+- story 執行期間的 `/discussion` 問卷放在 story 目錄的 `discussions/` 下
+- 每次只有一個 story 進行中
 
 ---
 
