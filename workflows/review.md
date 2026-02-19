@@ -99,6 +99,25 @@ pm/specs/{context}/
 - 讀取現有內容，確認格式規範和更新規則是否仍然正確
 - 若有新的 Context 類型或格式變更，更新對應說明
 
+### 4b. 合併 Page Spec 到 pm/specs/ui/（若有新頁面）
+
+// turbo
+```bash
+ls pm/planning/stories/{active_story}/pages/ 2>/dev/null || echo "無 page spec"
+```
+
+若 story 目錄下有 `pages/` 目錄：
+- 將所有 `page-{name}.md` 複製到 `pm/specs/ui/pages/`
+- 若 `pm/specs/ui/pages/` 不存在，先建立目錄
+- 若同名檔案已存在，以 story 版本覆蓋（story 版本是最新的）
+
+```bash
+mkdir -p pm/specs/ui/pages
+cp pm/planning/stories/{active_story}/pages/*.md pm/specs/ui/pages/
+```
+
+**Layout Spec 不需要複製**（`pm/specs/ui/layouts/` 是全域共用，只建立一次）
+
 ### 5. 更新 checklist.md
 勾選「文件更新完成」：
 ```markdown

@@ -193,6 +193,51 @@ cat pm/specs/glossary.md
 - 預期結果必須是可程式驗證的（URL、DOM 元素、文字內容）
 - 參考 skill 的「E2E 劇本完整性檢查」自我檢查
 
+### 6e. pages/（Page Spec 文件）
+
+為此 Story 涉及的每個**新頁面**建立 page spec 文件：
+
+**目錄位置（Story 執行期間）：**
+```
+pm/planning/stories/{story}/pages/page-{name}.md
+```
+
+**命名規則：** `page-{url-path-with-dashes}.md`
+- `/profiles` → `page-profiles-index.md`
+- `/profiles/create` → `page-profiles-create.md`
+- `/profiles/{id}` → `page-profiles-show.md`
+
+**Page Spec 格式：**
+```markdown
+# Page Spec: {url}
+
+## 基本資訊
+- **URL**: /path
+- **Layout**: auth | guest
+- **Blade**: `resources/views/{path}.blade.php`
+- **對應 UC**: UC-XX
+
+## Areas 內容
+
+### Area: content
+#### Block 1: {區塊名稱}
+[說明或欄位表格]
+
+#### Block 2: {區塊名稱}
+| 欄位 | 資料來源 | 說明 |
+|------|---------|------|
+```
+
+**Layout 參考：**
+- `pm/specs/ui/layouts/layout-auth.md`（已登入頁面）
+- `pm/specs/ui/layouts/layout-guest.md`（訪客頁面）
+
+**只需為「有業務判斷的頁面」建立 page spec：**
+- ✅ 列表頁（欄位選擇有業務意義）
+- ✅ 詳情頁（顯示哪些資訊有業務意義）
+- ✅ 首頁/行銷頁（文案和區塊結構）
+- ⬜ 表單頁（欄位直接對應 FormRequest，不需重複定義）
+
 **Domain Design（參考 plan skill 的 DDD 分析方法）：**
 - 識別 Bounded Context 和 Aggregate Root
 - 設計 Entities（對應 BR 規則）
