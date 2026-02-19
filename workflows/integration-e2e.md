@@ -86,18 +86,25 @@ cat backend/.env.test | grep DATABASE_URL
 ### 6. 建立 conftest.py（若不存在）
 
 依 `playwright-e2e` skill 的模板，在測試目錄建立 `conftest.py`：
-- `logged_in_user` fixture（登入共用邏輯）
-- `setup_db` fixture（測試前 migrate + seed）
+- `setup_db` fixture（class scope autouse，每個 class 開始前 `migrate:fresh`）
+- `flow_page` fixture（class scope，正向測試共用）
+- `logged_in` fixture（function scope，負向測試獨立用）
 
-### 7. 依劇本撰寫測試
+### 7. 依劇本撰寫測試（流程式架構）
 
-每個 `S-XX` 劇本對應一個 test function，依 `playwright-e2e` skill 的模板撰寫：
+依 `playwright-e2e` skill 的模板撰寫：
+
+- **正向劇本**（S-01 ~ S-0N）：用 `flow_page`，整個 class 共用一個已登入 page，依序執行
+- **負向劇本**（S-E01 ~ S-E0N）：用 `logged_in`，每個測試獨立
 
 ```python
-def test_s01_{scenario_name}(self, page: Page, logged_in_user):
-    """S-01：{劇本標題}"""
-    # 操作步驟 → 程式碼
-    # 預期結果 → assert / expect
+class TestFeaturePositive:
+    def test_s01_create(self, flow_page: Page):
+        """S-01：建立（流程式，不依賴 Seeder）"""
+
+class TestFeatureNegative:
+    def test_se01_validation(self, logged_in: Page):
+        """S-E01：負向驗證（獨立）"""
 ```
 
 ### 8. 執行測試
@@ -106,12 +113,26 @@ def test_s01_{scenario_name}(self, page: Page, logged_in_user):
 
 **Laravel：**
 ```bash
-# 從 .env.testing 讀取 APP_PORT（不寫死 port）
+# 執行全部測試
 APP_PORT=$(grep '^APP_PORT=' src/app/.env.testing | cut -d'=' -f2)
 python3 .windsurf/skills/webapp-testing/scripts/with_server.py \
   --server "cd src/app && php artisan serve --port=${APP_PORT} --env=testing" \
   --port ${APP_PORT} \
   -- .venv/bin/pytest src/tests/ -v
+
+# 執行指定測試（TEST 參數）
+APP_PORT=$(grep '^APP_PORT=' src/app/.env.testing | cut -d'=' -f2)
+python3 .windsurf/skills/webapp-testing/scripts/with_server.py \
+  --server "cd src/app && php artisan serve --port=${APP_PORT} --env=testing" \
+  --port ${APP_PORT} \
+  -- .venv/bin/pytest src/tests/ -v -k "TestProfilesPositive"
+```
+
+若專案有 `Makefile`：
+```bash
+make test-e2e                          # 執行全部
+make test-e2e TEST="-k TestPositive"   # 執行指定 class
+make test-e2e TEST="-k s07"            # 執行指定測試
 ```
 
 **FastAPI+Vue：**

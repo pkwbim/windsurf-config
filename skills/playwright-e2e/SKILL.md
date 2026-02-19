@@ -46,7 +46,7 @@ tests/E2E/
 
 ### 原則
 - **絕對不污染開發 DB**
-- 使用獨立測試 DB，測試結束後 rollback 或清除
+- 使用獨立測試 DB，每個 test class 開始前 `migrate:fresh`
 
 ### Laravel 做法
 啟動 server 時指定 `--env=testing`，使用 `.env.testing` 的 DB：
@@ -55,28 +55,9 @@ tests/E2E/
 # 啟動測試用 server（使用測試 DB）
 php artisan serve --port=8234 --env=testing
 
-# 測試前 migrate + seed
+# 測試前 migrate + seed（由 conftest.py 的 setup_db fixture 自動執行）
 php artisan migrate:fresh --env=testing --force
 php artisan db:seed --class=E2ETestSeeder --env=testing --force
-```
-
-在 `conftest.py` 中管理測試資料：
-```python
-import subprocess
-import pytest
-
-@pytest.fixture(scope="session", autouse=True)
-def setup_db():
-    """migrate:fresh + 建立所有 E2E 測試所需資料（session 級，只跑一次）"""
-    subprocess.run(
-        ["php", "artisan", "migrate:fresh", "--env=testing", "--force"],
-        cwd="src/app", check=True
-    )
-    subprocess.run(
-        ["php", "artisan", "db:seed", "--class=E2ETestSeeder", "--env=testing", "--force"],
-        cwd="src/app", check=True
-    )
-    yield
 ```
 
 ### FastAPI+Vue 做法
@@ -106,44 +87,78 @@ APP_URL=http://127.0.0.1:8234
 
 ---
 
-## 3. 依 e2e-scenarios.md 撰寫測試
+## 3. 測試架構：流程式測試（Positive）+ 獨立測試（Negative）
+
+### 核心概念
+
+**正向測試（Positive）→ 流程式**：整個 class 共用一個 `flow_page`，依序執行 UC，每步建立在前一步的結果上。
+- S-01 建立資料 → S-02 繼續建立 → S-03 驗證列表 → S-06 編輯 → S-07 刪除
+- 不依賴 Seeder 提供資料，測試本身就是資料的來源
+
+**負向測試（Negative）→ 獨立**：每個測試用 `logged_in` fixture（function scope），互相隔離。
 
 ### 對應規則
-每個 `S-XX` 劇本對應一個 test function：
+每個 `S-XX` 劇本對應一個 test function，正向測試用 `flow_page`，負向測試用 `logged_in`：
 
 ```python
-# e2e-scenarios.md 的 S-01 → test_s01_create_profile_solar
-def test_s01_create_profile_solar(page):
-    """S-01：成功建立命盤人物（陽曆）"""
-    # 依劇本的「操作步驟」逐步實作
-    # 依劇本的「預期結果」撰寫 assert
+# 正向：S-01 → test_s01_create_xxx（用 flow_page）
+def test_s01_create_xxx(self, flow_page: Page):
+    """S-01：成功建立..."""
+
+# 負向：S-E01 → test_se01_xxx（用 logged_in）
+def test_se01_xxx(self, logged_in: Page):
+    """S-E01：驗證失敗..."""
 ```
 
 ### 測試結構模板
 ```python
 import pytest
-from playwright.sync_api import Page, expect
+from playwright.sync_api import Page, Browser, expect
+from conftest import BASE_URL, TEST_EMAIL, TEST_PASSWORD
 
-class TestProfiles:
-    """對應 e2e-scenarios.md 的 Profiles 劇本群組"""
 
-    def test_s01_create_profile_solar(self, page: Page, logged_in_user):
-        """S-01：成功建立命盤人物（陽曆）"""
-        # 操作步驟
-        page.goto("http://127.0.0.1:8234/profiles")
-        page.click("text=新增人物")
-        # ...
-        # 預期結果
-        expect(page).to_have_url("http://127.0.0.1:8234/profiles")
-        expect(page.locator("text=王小明")).to_be_visible()
+@pytest.fixture(scope="class")
+def flow_page(browser: Browser, setup_db):
+    """整個 positive class 共用一個 page，登入一次，依序執行所有 UC。"""
+    context = browser.new_context()
+    page = context.new_page()
+    page.goto(f"{BASE_URL}/login")
+    page.wait_for_load_state("networkidle")
+    page.fill('input[name="email"]', TEST_EMAIL)
+    page.fill('input[name="password"]', TEST_PASSWORD)
+    page.click('button[type="submit"]')
+    page.wait_for_load_state("networkidle")
+    yield page
+    context.close()
 
-    def test_s02_create_profile_lunar(self, page: Page, logged_in_user):
-        """S-02：成功建立命盤人物（農曆）"""
-        pass
+
+class TestFeaturePositive:
+    """正向劇本：流程式，共用同一個已登入 page"""
+
+    def test_s01_create(self, flow_page: Page):
+        """S-01：建立資料"""
+        page = flow_page
+        # 操作...
+        # 驗證...
+
+    def test_s02_view(self, flow_page: Page):
+        """S-02：查看（S-01 建立的資料）"""
+        page = flow_page
+        # 繼續操作...
+
+
+class TestFeatureNegative:
+    """負向劇本：每個測試獨立"""
+
+    def test_se01_validation_error(self, logged_in: Page):
+        """S-E01：驗證失敗"""
+        page = logged_in
+        # 操作...
 ```
 
 ### 共用 fixture（conftest.py）
 ```python
+import os
 import subprocess
 import pytest
 from playwright.sync_api import Page
@@ -152,72 +167,97 @@ BASE_URL = "http://127.0.0.1:8234"
 TEST_EMAIL = "test_e2e@example.com"
 TEST_PASSWORD = "password"
 
+APP_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "app"))
 
-@pytest.fixture(scope="session", autouse=True)
-def setup_db():
-    """migrate:fresh + 建立所有 E2E 測試所需資料（session 級，只跑一次）"""
+
+def _fresh_db():
+    """migrate:fresh + E2ETestSeeder"""
     subprocess.run(
         ["php", "artisan", "migrate:fresh", "--env=testing", "--force"],
-        cwd="src/app", check=True
+        cwd=APP_DIR, check=True,
     )
     subprocess.run(
         ["php", "artisan", "db:seed", "--class=E2ETestSeeder", "--env=testing", "--force"],
-        cwd="src/app", check=True
+        cwd=APP_DIR, check=True,
     )
+
+
+@pytest.fixture(scope="class", autouse=True)
+def setup_db():
+    """每個 test class 開始前做 migrate:fresh，確保乾淨狀態"""
+    _fresh_db()
     yield
 
 
 @pytest.fixture
 def logged_in(page: Page):
-    """登入測試帳號，回傳已登入的 page"""
+    """登入測試帳號，回傳已登入的 page（function scope，負向測試用）"""
     page.goto(f"{BASE_URL}/login")
     page.wait_for_load_state("networkidle")
     page.fill('input[name="email"]', TEST_EMAIL)
     page.fill('input[name="password"]', TEST_PASSWORD)
     page.click('button[type="submit"]')
     page.wait_for_load_state("networkidle")
-    assert "/login" not in page.url, f"Login failed, still on: {page.url}"
     return page
 ```
+
+> **⚠️ 重要：`APP_DIR` 必須用絕對路徑**（`os.path.abspath`），避免 `with_server.py` 環境下相對路徑失效。
 
 ---
 
 ## 4. 測試資料建立方式
 
-### 策略：Session 級 Seeder（推薦）
+### 策略：流程式建立（推薦，取代 Seeder 策略）
 
-**核心原則：用 Artisan Seeder 建立資料，不要用 tinker 或 AI 猜測欄位。**
+**核心原則：正向測試自己建立資料，不依賴 Seeder。**
 
-Seeder 由 PHP/Laravel 用 Eloquent 建立，欄位正確性由 Model 保證。
+- S-01 建立人物 → S-02 再建立另一人物 → S-07 刪除 S-02 建立的人物
+- 資料由測試流程本身產生，不需要額外的 Seeder
+- `setup_db`（class scope）在每個 class 開始前 `migrate:fresh`，確保乾淨狀態
 
-```
-資料建立責任分工：
-- E2ETestSeeder     → 測試帳號（session 開始時建立）
-- E2EProfileSeeder  → 共用測試人物（session 開始時建立，供查看/列表類測試使用）
-- 測試函式內部      → 刪除/編輯類測試的「專用」資料（避免影響共用資料）
-```
-
-**conftest.py 的 setup_db 呼叫順序：**
 ```python
-@pytest.fixture(scope="session", autouse=True)
-def setup_db():
-    subprocess.run(["php", "artisan", "migrate:fresh", "--env=testing", "--force"], cwd="src/app", check=True)
-    subprocess.run(["php", "artisan", "db:seed", "--class=E2ETestSeeder", "--env=testing", "--force"], cwd="src/app", check=True)
-    subprocess.run(["php", "artisan", "db:seed", "--class=E2EProfileSeeder", "--env=testing", "--force"], cwd="src/app", check=True)
-    yield
+# ✅ 正確：流程式，S-07 刪除 S-02 建立的資料
+def test_s02_create(self, flow_page: Page):
+    """S-02：建立陳小花"""
+    # 建立資料...
+
+def test_s07_delete(self, flow_page: Page):
+    """S-07：刪除陳小花（S-02 建立的）"""
+    chen_row = page.locator('[data-profile-name="陳小花"]').first
+    chen_row.locator('button[title="刪除"]').click()
+    # ...
 ```
 
-**刪除/編輯類測試的專用資料（在測試函式內建立）：**
+### ⚠️ 驗證「已刪除」的正確做法
+
+刪除後不要用 `not_to_be_visible()`（strict mode 下多個匹配會報錯），改用：
+
 ```python
-def test_s07_delete_profile(self, logged_in):
-    """S-07：刪除人物（使用專用資料，不動共用資料）"""
-    # 在測試內建立專用資料
-    subprocess.run(
-        ["php", "artisan", "db:seed", "--class=E2EDeleteTargetSeeder", "--env=testing", "--force"],
-        cwd="src/app", check=True
-    )
-    # 接著操作...
+# ✅ 正確：確認 data-* 行數為 0
+expect(page.locator('[data-profile-name="陳小花"]')).to_have_count(0)
+
+# ✅ 或：確認成功訊息 + 目標人物仍存在
+expect(page.locator("text=人物已成功刪除")).to_be_visible()
+expect(page.get_by_role("link", name="王大明").first).to_be_visible()
+
+# ❌ 錯誤：strict mode 下若有多個同名元素會 AssertionError
+expect(page.get_by_role("link", name="陳小花")).not_to_be_visible()
 ```
+
+### E2ETestSeeder 的職責
+
+`E2ETestSeeder` 只負責建立**測試帳號**（user），不建立業務資料：
+
+```php
+// E2ETestSeeder.php
+User::create([
+    'name'     => 'E2E Test User',
+    'email'    => 'test_e2e@example.com',
+    'password' => Hash::make('password'),
+]);
+```
+
+業務資料（如 Profile）由測試流程的 `flow_page` 測試步驟自己建立。
 
 ### FastAPI（Fixture）
 ```python
