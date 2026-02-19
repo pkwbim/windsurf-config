@@ -43,6 +43,11 @@ git branch --show-current
 
 // turbo
 ```bash
+ls pm/planning/stories/
+```
+
+// turbo
+```bash
 cat pm/planning/01_backlog.md
 cat pm/planning/stories/AGENTS.md
 cat docs/tech-stack.md
@@ -69,16 +74,42 @@ cat pm/specs/glossary.md
 
 ---
 
-## 步驟 3：澄清需求與規模評估
+## 步驟 3：初始化 Story 目錄
+
+- 決定 Story ID（查看 `pm/planning/stories/AGENTS.md` 取得下一個流水號）
+- 目錄命名格式：`STORY-{流水號}-{CamelCase描述}`（例如 `STORY-001-UserLogin`）
+- 建立以下結構：
+  ```
+  pm/planning/stories/STORY-{流水號}-{CamelCase描述}/
+  ├── discussions/     ← 空目錄
+  └── decisions/       ← 空目錄
+  ```
+- 更新 `pm/planning/02_active.md`：
+  ```yaml
+  ---
+  active_story: STORY-{流水號}-{CamelCase描述}
+  active_story_dir: pm/planning/stories/STORY-{流水號}-{CamelCase描述}/
+  ---
+
+  # 🚀 Active
+
+  目前執行中：**STORY-{流水號}-{CamelCase描述}**
+  規格文件：`pm/planning/stories/STORY-{流水號}-{CamelCase描述}/`
+  ```
+- 將故事從 `pm/planning/01_backlog.md` 移除
+
+---
+
+## 步驟 4：澄清需求與規模評估
 
 仔細審查使用者故事，依序判斷：
 
-### 3a. 需求是否清楚？
+### 4a. 需求是否清楚？
 - **問自己：**範圍是否 100% 清楚？Actor 是誰？主要操作是什麼？
-- **如有任何疑問：**執行 `/discussion` workflow，**問卷放在全域 `discussions/questionnaires/` 下**（此時 story 目錄尚未建立），然後**停止**，等待使用者回覆後再繼續。
-- **如果清楚：**繼續 3b。
+- **如有任何疑問：**執行 `/discussion` workflow，**問卷放在 story 目錄的 `discussions/` 下**，然後**停止**，等待使用者回覆後再繼續。
+- **如果清楚：**繼續 4b。
 
-### 3b. Story 規模是否合適？
+### 4b. Story 規模是否合適？
 
 **判斷標準（符合任一條即視為太大）：**
 - 預估 Use Case 超過 6 個
@@ -110,33 +141,7 @@ cat pm/specs/glossary.md
    - 告訴使用者：「原 Story 已拆分完畢，子 Story 已加入 backlog，並已 merge 回 main。請選擇要先規劃哪個子 Story，再重新執行 `/plan`（會從 main 建立新 branch）。」
    - **停止，不繼續建立目錄或規格。**
 
-**如果規模合適：**繼續步驟 4。
-
----
-
-## 步驟 4：初始化 Story 目錄
-
-- 決定 Story ID（查看 `pm/planning/stories/AGENTS.md` 取得下一個流水號）
-- 目錄命名格式：`STORY-{流水號}-{CamelCase描述}`（例如 `STORY-001-UserLogin`）
-- 建立以下結構：
-  ```
-  pm/planning/stories/STORY-{流水號}-{CamelCase描述}/
-  ├── discussions/     ← 空目錄
-  └── decisions/       ← 空目錄
-  ```
-- 更新 `pm/planning/02_active.md`：
-  ```yaml
-  ---
-  active_story: STORY-{流水號}-{CamelCase描述}
-  active_story_dir: pm/planning/stories/STORY-{流水號}-{CamelCase描述}/
-  ---
-
-  # 🚀 Active
-
-  目前執行中：**STORY-{流水號}-{CamelCase描述}**
-  規格文件：`pm/planning/stories/STORY-{流水號}-{CamelCase描述}/`
-  ```
-- 將故事從 `pm/planning/01_backlog.md` 移除
+**如果規模合適：**繼續步驟 5。
 
 ---
 
