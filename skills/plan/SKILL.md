@@ -174,6 +174,27 @@ STORY-001-CamelCaseDesc/
 
 ## 2. Backend（Infrastructure Layer）
 
+### ⚠️ 命名一致性對照表（必填）
+
+> 路由前綴、Controller 目錄、DB 表名稱必須使用**同一個英文單字**，避免日後混淆。
+
+| 層次 | 命名 | 本 Story 實際值 |
+|------|------|----------------|
+| 路由前綴（URL） | 複數名詞 | `/[名稱複數]` |
+| Controller 目錄 | 對應路由 | `[名稱複數]/` |
+| Controller 類別 | 對應路由 + Controller | `[名稱複數]Controller` |
+| DB 表名稱 | 對應路由 | `[名稱複數]` |
+| Model 類別 | 單數 | `[名稱單數]` |
+
+**範例（正確）：**
+| 層次 | 值 |
+|------|---|
+| 路由前綴 | `/profiles` |
+| Controller 目錄 | `Profiles/` |
+| Controller 類別 | `ProfilesController` |
+| DB 表名稱 | `profiles` |
+| Model 類別 | `Profile` |
+
 ### Repository
 - `[名稱]Repository` - [說明]
 
@@ -275,6 +296,17 @@ STORY-001-CamelCaseDesc/
 - 定義 Repository 介面：`[名稱]RepositoryProtocol`
 - 定義 Service 介面：`[名稱]ServiceProtocol`
 - 放在 `shared_contracts/interfaces/`
+
+---
+
+## ✅ spec.md 命名一致性檢查
+
+產生 `spec.md` 後，AI 應自動檢查：
+
+- [ ] 路由前綴、Controller 目錄、DB 表名稱是否使用同一個英文單字（複數）？
+- [ ] Controller 類別名稱是否為「路由單字複數 + Controller」？
+- [ ] Model 類別名稱是否為路由單字的單數形？
+- [ ] 若有不一致，必須在規劃階段就修正，不可留到開發階段才發現
 
 ---
 
