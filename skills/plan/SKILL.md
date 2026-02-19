@@ -18,9 +18,8 @@ STORY-001-CamelCaseDesc/
 ├── use-cases.md          # 1. Use Case 清單（先產生，確認後再繼續）
 ├── business-rules.md     # 2. 業務規則（確認後同時產生）
 ├── spec.md               # 3. 技術規格（確認後同時產生）
-├── db-changes.md         # 4. DB 變動清單（有 Migration 時產生）
-├── checklist.md          # 5. 開發進度追蹤（確認後同時產生）
-├── e2e-scenarios.md      # 6. E2E 測試劇本（確認後同時產生）
+├── checklist.md          # 4. 開發進度追蹤（確認後同時產生）
+├── e2e-scenarios.md      # 5. E2E 測試劇本（確認後同時產生）
 ├── discussions/          # 此 story 的討論問卷
 └── decisions/            # 此 story 的決策文件
 ```
@@ -28,7 +27,6 @@ STORY-001-CamelCaseDesc/
 **執行順序：**
 1. 產生 `use-cases.md` → 等待使用者確認
 2. 確認後，同時產生 `business-rules.md`、`spec.md`、`checklist.md`、`e2e-scenarios.md`
-3. 若此 Story 有 DB 變動（新增表、修改欄位、新增索引）→ 同時產生 `db-changes.md`
 
 ---
 
@@ -263,62 +261,6 @@ STORY-001-CamelCaseDesc/
 
 ### 相依性
 - [ ] 依賴 Story：[Story ID]
-```
-
----
-
-## 📦 DB 變動文件規範（db-changes.md）
-
-### 文件目的
-記錄此 Story 對 DB 結構的所有變動，供 Migration 撰寫時逐項對照。包含欄位定義、索引、外鍵約束。
-
-### Migration 欄位 Comment 規則
-- **需要加 comment**：業務含義不明顯的欄位（如 `earthly_branch`、`birth_is_leap`、`birth_lunar_year`）
-- **不需要加 comment**：常見欄位（`id`、`name`、`email`、`created_at`、`updated_at`）
-- Laravel 寫法：`$table->string('earthly_branch')->comment('時辰地支，由出生時間換算');`
-
-### 文件結構
-```markdown
-# DB 變動：[Story 標題]
-
-**Story ID**: STORY-{流水號}
-**Migration 檔案**: YYYY_MM_DD_HHMMSS_create_{table}_table.php
-
----
-
-## 新增表：{table_name}
-
-### 欄位
-| 欄位名 | 型別 | 必填 | 預設值 | SQL Comment |
-|--------|------|------|--------|-------------|
-| id | bigint unsigned | ✓ | auto | |
-| user_id | bigint unsigned | ✓ | - | 外鍵 → users.id |
-| name | varchar(100) | ✓ | - | |
-| earthly_branch | varchar(2) | ✓ | - | 時辰地支，由出生時間換算 |
-| created_at | timestamp | - | null | |
-| updated_at | timestamp | - | null | |
-
-### 索引
-| 索引名 | 欄位 | 類型 | 說明 |
-|--------|------|------|------|
-| {table}_user_id_index | user_id | INDEX | 查詢效能 |
-
-### 外鍵約束
-| 約束名 | 欄位 | 參照 | ON DELETE |
-|--------|------|------|-----------|
-| {table}_user_id_foreign | user_id | users.id | CASCADE |
-
----
-
-## 修改表：{table_name}（若有修改既有表）
-
-### 新增欄位
-| 欄位名 | 型別 | 必填 | 預設值 | SQL Comment |
-|--------|------|------|--------|-------------|
-
-### 移除欄位
-| 欄位名 | 原型別 | 說明 |
-|--------|--------|------|
 ```
 
 ---

@@ -72,9 +72,19 @@ ls src/app/app/Http/Controllers/
 
 **從 `pm/specs/` 了解現有系統狀態：**
 - `pm/specs/README.md`：確認哪些 Bounded Context 已完成，避免重複建立
-- `pm/specs/{context}/domain-model.md`：確認現有 Entity 和 DB 欄位（若此 story 依賴既有 Context）
+- `pm/specs/{context}/domain-model.md`：確認現有 Entity 和業務方法（若此 story 依賴既有 Context）
 - `pm/specs/{context}/routes.md`：確認現有路由，避免命名衝突
 - `pm/specs/ui/pages/`：確認頁面規格，了解 UI 期望的資料結構
+
+**了解現有 DB Schema（優先順序）：**
+```bash
+# 優先：有 DB 連線時，一次取得所有表的完整 schema（含 comment）
+cd src/app && php artisan db:show --json
+
+# Fallback：無 DB 連線時，讀 Migration 檔
+ls src/app/database/migrations/
+cat src/app/database/migrations/{對應檔案}.php
+```
 
 ### 2. 分析實作範圍（必須引用規格）
 
