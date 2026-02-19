@@ -85,8 +85,18 @@ pm/specs/{context}/
 **更新規則：**
 - `spec.md`：更新功能摘要、狀態、最後更新日期
 - `use-cases.md`：新增或修改 Use Case 描述
-- `domain-model.md`：新增或修改 Entity、Value Object、DB 欄位
+- `domain-model.md`：新增或修改 Entity、Value Object、DB 欄位（使用資料庫字典格式，見下方）
 - `routes.md`：新增或修改路由、FormRequest、Middleware
+
+**`domain-model.md` 資料庫字典格式（必須使用此格式）：**
+```markdown
+| 欄位名 | 型別 | 必填 | 預設值 | 說明 | 對應 BR | 索引 |
+|--------|------|------|--------|------|---------|------|
+| id | bigint | ✓ | auto | 主鍵 | - | PK |
+| user_id | bigint | ✓ | - | 外鍵 → users.id | - | INDEX |
+| name | varchar(100) | ✓ | - | 人物姓名 | BR-01 | - |
+```
+索引欄值：`PK`（主鍵）、`INDEX`（普通索引）、`UNIQUE`（唯一索引）、`-`（無索引）
 
 **若是全新 Context：**
 - 建立目錄和 4 個檔案
