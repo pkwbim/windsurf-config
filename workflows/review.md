@@ -118,6 +118,30 @@ cp pm/planning/stories/{active_story}/pages/*.md pm/specs/ui/pages/
 
 **Layout Spec 不需要複製**（`pm/specs/ui/layouts/` 是全域共用，只建立一次）
 
+### 4c. 更新 pm/specs/AGENTS.md 與 README.md
+
+// turbo
+```bash
+cat pm/specs/README.md
+cat pm/specs/AGENTS.md
+```
+
+**若此 Story 建立了全新 Bounded Context：**
+
+1. 更新 `pm/specs/README.md`：
+   - 將對應 Context 的狀態從 `⬜ 待規劃` 改為 `✅ 完成`
+   - 確認目錄路徑正確
+
+2. 更新 `pm/specs/AGENTS.md` 的目錄結構圖：
+   - 在 `{context}/` 區塊加入新建立的 context 目錄名稱
+
+**若此 Story 引入新的資料查找路徑（如新的 ui/ 子目錄、新的規格類型）：**
+
+3. 更新 `pm/specs/AGENTS.md` 的「AI 查找資料導引」表格：
+   - 加入新的查找路徑說明，讓未來的 AI 知道去哪裡找資料
+
+**目的：** 隨著 specs 愈來愈大，AGENTS.md 是 AI 的導覽地圖，必須保持最新。
+
 ### 5. 更新 checklist.md
 勾選「文件更新完成」：
 ```markdown

@@ -55,10 +55,11 @@ cp src/app/.env.testing.example src/app/.env.testing
 cd src/app && php artisan migrate --env=testing
 ```
 
-### 1. 讀取規格與 Contract 骨架
+### 1. 讀取規格與現有系統狀態
 // turbo
 ```bash
 cat pm/planning/stories/{active_story}/spec.md
+cat pm/specs/README.md
 ls src/app/app/Http/Requests/
 ls src/app/app/Http/Controllers/
 ```
@@ -68,6 +69,12 @@ ls src/app/app/Http/Controllers/
 - 對應的 FormRequest 驗證規則
 - 成功/失敗的 Redirect 行為
 - 需要的 Middleware（`auth`、`guest`）
+
+**從 `pm/specs/` 了解現有系統狀態：**
+- `pm/specs/README.md`：確認哪些 Bounded Context 已完成，避免重複建立
+- `pm/specs/{context}/domain-model.md`：確認現有 Entity 和 DB 欄位（若此 story 依賴既有 Context）
+- `pm/specs/{context}/routes.md`：確認現有路由，避免命名衝突
+- `pm/specs/ui/pages/`：確認頁面規格，了解 UI 期望的資料結構
 
 ### 2. 分析實作範圍（必須引用規格）
 
