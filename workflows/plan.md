@@ -349,7 +349,7 @@ pm/planning/stories/{story}/pages/page-{name}.md
 - 開發進度：`pm/planning/stories/STORY-XXX/checklist.md`
 - E2E 劇本：`pm/planning/stories/STORY-XXX/e2e-scenarios.md`
 
-當您想開始實作時，執行 `/build`。
+當您想開始實作時，執行 `/build` 系列，如 `/build-ui`, `/build-contract`, `/build-backend`, `/build-laravel-ui`, `/build-laravel-contract`, `/build-laravel-backend`。
 ```
 
 **不要撰寫任何程式碼。**
