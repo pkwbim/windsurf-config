@@ -13,6 +13,8 @@
 | `/build-laravel-ui` | 純 UI 開發（Laravel + Blade + Alpine.js） | Laravel 專案 story 的第一階段 |
 | `/build-laravel-contract` | Form Contract 設計（FormRequest + Controller 骨架） | UI 完成後，定義驗證規則和 Controller 行為 |
 | `/build-laravel-backend` | Backend TDD 實作（Controller 邏輯 + Feature Test） | Contract 完成後，TDD 實作真實邏輯 |
+| `/integration-e2e` | Playwright E2E 整合測試（通用，支援 Laravel + FastAPI+Vue） | Backend 完成後，依 e2e-scenarios.md 執行 E2E 測試 |
+| `/integration` | 整合測試（FastAPI+Vue 舊版） | FastAPI+Vue 專案的整合測試 |
 | `/init` | 引導流程入口 | **第一次使用時從這裡開始** |
 | `/setup-project-info` | 建立非技術目錄 | 新專案初始化 |
 | `/setup-techstack` | 設定技術棧 | 新專案或更換技術棧 |
