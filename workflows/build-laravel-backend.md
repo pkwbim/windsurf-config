@@ -86,6 +86,23 @@ ls src/app/database/migrations/
 cat src/app/database/migrations/{對應檔案}.php
 ```
 
+### 1.5 清查 UI 階段假資料（必做）
+
+讀取 `checklist.md` 的假資料清單，逐一確認每個假資料頁面已換成真實資料：
+
+```bash
+# 找出所有假資料標記
+grep -rn "TODO: 換成真實資料" src/app/resources/views/
+grep -rn "TODO: 換成真實資料" src/app/app/Http/Controllers/
+```
+
+**處理原則：**
+- 每個 `TODO: 換成真實資料` 必須在此階段替換為真實的 Controller 資料傳遞
+- 替換完成後移除 `TODO` 註解
+- 若某頁面的假資料需要新的 DB 查詢，在步驟 3 的 Feature Test 中一併測試
+
+---
+
 ### 2. 分析實作範圍（必須引用規格）
 
 在開始實作前，明確列出：

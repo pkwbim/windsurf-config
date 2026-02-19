@@ -149,6 +149,32 @@ resources/views/
 </form>
 ```
 
+> ⚠️ **Alpine.js x-show 表單規範：**
+> 當用 `x-show` 切換多個表單區塊時（如陰曆切換），**不能在不同區塊重複相同的 `name` 欄位**。
+> 應改用單一隱藏欄位配合 Alpine.js 綁定：
+> ```blade
+> {{-- ✅ 正確：單一隱藏欄位，由 Alpine.js 控制其值 --}}
+> <input type="hidden" name="date_type" :value="dateType">
+>
+> {{-- ❌ 錯誤：兩個 x-show 區塊各有一個 name="date_type"，送出時會重複 --}}
+> <div x-show="dateType === 'solar'">
+>     <input type="hidden" name="date_type" value="solar">  {{-- 錯誤 --}}
+> </div>
+> <div x-show="dateType === 'lunar'">
+>     <input type="hidden" name="date_type" value="lunar">  {{-- 錯誤 --}}
+> </div>
+> ```
+
+> ⚠️ **表單必須顯示 `@error` 訊息：**
+> 所有 Blade 表單欄位必須在驗證失敗時顯示錯誤訊息，並用 `old()` 保留已填入的內容：
+> ```blade
+> <input type="text" name="name" value="{{ old('name') }}"
+>        class="... @error('name') border-red-500 @enderror">
+> @error('name')
+>     <p class="text-xs text-red-400">{{ $message }}</p>
+> @enderror
+> ```
+
 **UI 開發階段假資料**：直接寫死在 Blade 模板中，或在 Controller 回傳假陣列：
 ```php
 // routes/web.php - UI 開發階段
@@ -156,6 +182,29 @@ Route::get('/dashboard', function () {
     return view('dashboard');  // 假資料直接寫在 Blade 中
 })->name('dashboard');
 ```
+
+> ⚠️ **假資料標記規範（必遵）：**
+> 所有寫死的假資料必須加上標記註解，方便 Backend 階段清查：
+> ```blade
+> {{-- TODO: 換成真實資料 --}}
+> <p>王小明</p>
+> ```
+> ```php
+> // TODO: 換成真實資料
+> $profiles = [['name' => '王小明', 'gender' => 'male']];
+> ```
+
+> ⚠️ **可測試 UI 規範（必遵）：**
+> 依照 `page-{name}.md` 的「🧪 可測試性規範」區塊，為互動元素加上 `data-*` 屬性：
+> ```blade
+> {{-- 列表每行：加上 data-* 供 Playwright 定位 --}}
+> <div class="grid grid-cols-12 ..."
+>      :data-profile-name="profile.name">
+>
+> {{-- 操作按鈕：加上 title 供 Playwright 定位 --}}
+> <a :href="`/profiles/${profile.id}/edit`" title="編輯">...圖標...</a>
+> <button @click="openDeleteModal(...)" title="刪除">...圖標...</button>
+> ```
 
 ### 5. 設定 Laravel 路由
 
@@ -193,7 +242,16 @@ make start
 - [x] **階段 1: 純 UI 開發** (`/build-laravel-ui`) ✅
   - [x] layouts/guest.blade.php / layouts/auth.blade.php 版型
   - [x] [已完成的頁面列表]
+  - [x] Alpine.js 規範檢查：x-show 切換區塊中沒有重複的 name 欄位
+  - [x] 所有表單欄位已加入 @error 訊息顯示與 old() 保留
+  - [x] 可測試 UI 檢查：依照 page spec 的 🧪 區塊加上 data-* 屬性
+  - [x] 假資料標記：所有寫死假資料已加上 `{{-- TODO: 換成真實資料 --}}` 註解
   - [ ] 人工驗證 UI  ⬅️ 等待確認
+
+### 📝 假資料清單（Backend 階段必須逐一處理）
+| 頁面 | Blade 模板路徑 | 假資料說明 |
+|------|--------------|----------|
+| [頁面名稱] | `resources/views/xxx.blade.php` | [哪些資料是假的] |
 ```
 
 ### 8. 通知使用者驗證

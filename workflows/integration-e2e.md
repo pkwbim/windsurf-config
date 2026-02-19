@@ -58,14 +58,24 @@ cat pm/planning/stories/{active_story}/e2e-scenarios.md
 
 逐一列出所有劇本（S-01、S-02...），確認哪些需要自動化。
 
-### 5. 確認 DB 隔離設定
+### 5. 確認 DB 隔離設定與 .env.testing 必要設定
 
 依 `playwright-e2e` skill 的 DB 隔離策略：
 
 **Laravel：**
 ```bash
-# 確認 .env.testing 存在
-cat src/app/.env.testing | grep DB_DATABASE
+# 確認 .env.testing 存在且包含必要設定
+cat src/app/.env.testing | grep -E "DB_DATABASE|SESSION_DRIVER|APP_URL"
+```
+
+**必須確認以下兩項，否則 E2E 測試必定失敗：**
+1. `SESSION_DRIVER=file`（不能是 `array`，真實瀏覽器需要持久化 session）
+2. `APP_URL=http://127.0.0.1:{APP_PORT}`（必須含 port，否則 CSRF 驗證失敗）
+
+若設定不正確，立即修正 `src/app/.env.testing`：
+```ini
+SESSION_DRIVER=file
+APP_URL=http://127.0.0.1:{APP_PORT}  # 必須與 APP_PORT 一致
 ```
 
 **FastAPI+Vue：**
@@ -96,10 +106,12 @@ def test_s01_{scenario_name}(self, page: Page, logged_in_user):
 
 **Laravel：**
 ```bash
-python .windsurf/skills/webapp-testing/scripts/with_server.py \
-  --server "cd src/app && php artisan serve --port=8234 --env=testing" \
-  --port 8234 \
-  -- pytest {測試目錄}/ -v
+# 從 .env.testing 讀取 APP_PORT（不寫死 port）
+APP_PORT=$(grep '^APP_PORT=' src/app/.env.testing | cut -d'=' -f2)
+python3 .windsurf/skills/webapp-testing/scripts/with_server.py \
+  --server "cd src/app && php artisan serve --port=${APP_PORT} --env=testing" \
+  --port ${APP_PORT} \
+  -- .venv/bin/pytest src/tests/ -v
 ```
 
 **FastAPI+Vue：**

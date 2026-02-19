@@ -226,7 +226,31 @@ pm/planning/stories/{story}/pages/page-{name}.md
 #### Block 2: {區塊名稱}
 | 欄位 | 資料來源 | 說明 |
 |------|---------|------|
+
+## 🧪 可測試性規範
+
+> **⚠️ 此區塊為必填**，`build-laravel-ui` 實作時必須依此加上 `data-*` 屬性，`integration-e2e` 撰寫測試前必須讀此區塊確認 selector。
+
+### 列表行定位
+| 元素 | data-* 屬性 | 說明 |
+|------|------------|------|
+| 列表每行 | `:data-{entity}-name="{item.name}"` | Alpine.js 動態綁定，供 Playwright 定位特定行 |
+
+### 操作按鈕/連結
+| 元素 | 屬性 | 值 |
+|------|------|-----|
+| 編輯連結 | `title` | `"編輯"` |
+| 刪除按鈕 | `title` | `"刪除"` |
+| 其他操作 | `title` | `"操作名稱"` |
+
+### 其他可測試元素
+[列出此頁面特有的需要定位的元素，例如 modal、tab、狀態標籤等]
 ```
+
+> **規範說明：**
+> - `data-*` 屬性不影響視覺呈現，是 HTML 標準屬性
+> - Alpine.js 動態綁定用 `:data-xxx="value"`，Playwright 在 `networkidle` 後可正確讀取
+> - 操作按鈕用 `title` 屬性，Playwright 用 `locator('button[title="刪除"]')` 定位
 
 **Layout 參考：**
 - `pm/specs/ui/layouts/layout-auth.md`（已登入頁面）
