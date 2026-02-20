@@ -90,6 +90,11 @@ pm/specs/{context}/
 
 > **DB 欄位細節不在 `domain-model.md` 維護**，直接查 Migration 檔或執行 `php artisan db:show --json`。
 
+> ⚠️ **specs 必須自給自足（Self-Contained）**：
+> - 合併到 `pm/specs/` 的內容必須直接包含所有知識，**不得以 `pm/planning/stories/...` 路徑回參 story 文件**
+> - 技術決策、計算公式、業務規則等，直接寫入 `pm/specs/` 對應檔案
+> - `pm/specs/` 是系統的唯一真相來源（Single Source of Truth），讀者不需要再去翻 story 目錄
+
 **若是全新 Context：**
 - 建立目錄和 4 個檔案
 - 更新 `pm/specs/README.md` 索引表
