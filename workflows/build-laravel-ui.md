@@ -22,7 +22,7 @@ description: 階段 1 - 純 UI 開發（Laravel + Blade + Tailwind CSS v4 + Alpi
 |-------|---------|------|
 | `tailwindcss-development` | 加入 Tailwind CSS 樣式、響應式設計、dark mode | 步驟 4 |
 | `frontend-design` | 設計頁面視覺風格、UI 元件美化 | 步驟 4 |
-| `ui-ux-pro-max` | 需要 UI/UX 設計指引、色彩配置、字型搭配 | 步驟 4 |
+| `ui-ux-pro-max` | 產生設計系統（色彩、字型、風格）、UI/UX 設計指引 | 步驟 2.5 & 4 |
 | `webapp-testing` | 使用 Playwright 驗證 UI 功能（可選） | 步驟 8 |
 
 ---
@@ -69,6 +69,28 @@ cat pm/planning/stories/{active_story}/use-cases.md
 ```
 
 **若規格不清楚，觸發 `/discussion` workflow，不要自行假設。**
+
+### 2.5. 產生設計系統（ui-ux-pro-max）
+
+> 🧠 **此步驟使用 `ui-ux-pro-max` skill**，在寫任何 UI 之前先確立設計方向，確保所有頁面風格一致。
+
+執行設計系統產生指令：
+```bash
+python3 .windsurf/skills/ui-ux-pro-max/scripts/search.py "<產品類型> <產業> <風格關鍵字>" --design-system --persist -p "<專案名稱>"
+```
+
+**範例（紫微斗數排盤）：**
+```bash
+python3 .windsurf/skills/ui-ux-pro-max/scripts/search.py "astrology chart fortune-telling traditional chinese" --design-system --persist -p "HeavenlyCode"
+```
+
+指令執行後會產生：
+- `design-system/MASTER.md` — 全域設計系統（色彩、字型、風格、UX 規範）
+- `design-system/pages/` — 各頁面 override 目錄（可選）
+
+**後續步驟 4 實作 Blade 頁面時，必須先讀取 `design-system/MASTER.md`，依其規範套用色彩、字型、元件風格。**
+
+> ⚠️ 若 `design-system/MASTER.md` 已存在（前次執行過），跳過此步驟，直接讀取現有設計系統。
 
 ### 3. 建立 Blade 版型（Layouts）
 

@@ -14,7 +14,7 @@ description: 將想法轉換為規格（包含澄清檢查）
 ```
 pm/planning/stories/
 ├── AGENTS.md                        # 所有 story 狀態總覽
-└── STORY-{流水號}-{CamelCase描述}/   # 每個 story 的目錄
+└── STR-YYYYMMDDHHMM-STORY-{流水號}-{CamelCase描述}/   # 每個 story 的目錄
     ├── use-cases.md                  # Use Case 清單（先產生並確認）
     ├── business-rules.md             # 業務規則（確認 use-cases 後產生）
     ├── spec.md                       # 技術規格（確認 use-cases 後產生）
@@ -77,24 +77,24 @@ cat pm/specs/glossary.md
 ## 步驟 3：初始化 Story 目錄
 
 - 決定 Story ID（查看 `pm/planning/stories/AGENTS.md` 取得下一個流水號）
-- 目錄命名格式：`STORY-{流水號}-{CamelCase描述}`（例如 `STORY-001-UserLogin`）
+- 目錄命名格式：`STR-YYYYMMDDHHMM-STORY-{流水號}-{CamelCase描述}`（例如 `202502201039-STORY-001-UserLogin`）
 - 建立以下結構：
   ```
-  pm/planning/stories/STORY-{流水號}-{CamelCase描述}/
+  pm/planning/stories/STR-YYYYMMDDHHMM-STORY-{流水號}-{CamelCase描述}/
   ├── discussions/     ← 空目錄
   └── decisions/       ← 空目錄
   ```
 - 更新 `pm/planning/02_active.md`：
   ```yaml
   ---
-  active_story: STORY-{流水號}-{CamelCase描述}
-  active_story_dir: pm/planning/stories/STORY-{流水號}-{CamelCase描述}/
+  active_story: STR-YYYYMMDDHHMM-STORY-{流水號}-{CamelCase描述}
+  active_story_dir: pm/planning/stories/STR-YYYYMMDDHHMM-STORY-{流水號}-{CamelCase描述}/
   ---
 
   # 🚀 Active
 
-  目前執行中：**STORY-{流水號}-{CamelCase描述}**
-  規格文件：`pm/planning/stories/STORY-{流水號}-{CamelCase描述}/`
+  目前執行中：**STR-YYYYMMDDHHMM-STORY-{流水號}-{CamelCase描述}**
+  規格文件：`pm/planning/stories/STR-YYYYMMDDHHMM-STORY-{流水號}-{CamelCase描述}/`
   ```
 - 將故事從 `pm/planning/01_backlog.md` 移除
 
@@ -338,7 +338,7 @@ pm/planning/stories/{story}/pages/page-{name}.md
 
 在狀態總覽表格新增此 story 的一列：
 ```
-| STORY-{流水號}-{CamelCase描述} | [標題] | [簡短描述] | `planning` | YYYY-MM-DD | - |
+| STR-YYYYMMDDHHMM-STORY-{流水號}-{CamelCase描述} | [標題] | [簡短描述] | `planning` | YYYY-MM-DD | - |
 ```
 
 ---
