@@ -278,23 +278,79 @@ make start
 
 ### 8. Playwright 自動截圖驗證 UI
 
-> 🧠 **此步驟「必須」執行，不可略過**：使用 `webapp-testing` skill 的 Playwright 自動截圖，確認 UI 正常再交件。
+> 🧠 **此步驟「必須」執行，不可略過**：使用 Playwright 自動截圖，確認 UI 正常再交件。
 
-**執行步驟：**
-1. 讀取 `webapp-testing` skill 了解 Playwright 使用方式
-2. 建立暫存截圖腳本（放在 `scripts/temp/`）
-3. 截圖此 Story 涉及的所有頁面
-4. 檢查截圖中的 UI 是否符合預期（按鈕位置、樣式、內容）
-5. **找到問題必須修正後再截圖確認，直到满意才可進入下一步**
+#### 8.1 執行方式（必須用 with_server.py，不可用獨立腳本）
 
-**驗證重點：**
+參考 `/integration-e2e` workflow 的執行方式與 `src/tests/` 下的現有測試腳本：
+
+```bash
+# 讀取 APP_PORT
+APP_PORT=$(grep '^APP_PORT=' src/app/.env.testing | cut -d'=' -f2)
+
+# 用 with_server.py 啟動 testing server 並執行 pytest
+python3 .windsurf/skills/webapp-testing/scripts/with_server.py \
+  --server "cd src/app && php artisan serve --port=${APP_PORT} --env=testing" \
+  --port ${APP_PORT} \
+  -- .venv/bin/pytest scripts/temp/test_{story_id}_ui.py -v -s
+```
+
+> ⚠️ **不可直接 `python script.py` 執行**，必須透過 `with_server.py` 管理 server 生命週期。
+
+#### 8.2 測試腳本結構（參考 `src/tests/AiChatTest.py`）
+
+暫存腳本放在 `scripts/temp/test_{story_id}_ui.py`，結構如下：
+
+```python
+import pytest
+from playwright.sync_api import Page, Browser, expect
+
+APP_PORT = "8236"  # 從 .env.testing 讀取
+BASE_URL = f"http://127.0.0.1:{APP_PORT}"
+TEST_EMAIL = "test_e2e@example.com"
+TEST_PASSWORD = "password"
+GOTO_TIMEOUT = 30_000
+
+@pytest.fixture(scope="module")
+def ui_page(browser: Browser):
+    ctx = browser.new_context(viewport={"width": 1440, "height": 900})
+    page = ctx.new_page()
+    # 登入
+    page.goto(f"{BASE_URL}/login", timeout=GOTO_TIMEOUT)
+    page.wait_for_load_state("networkidle")
+    page.fill('input[name="email"]', TEST_EMAIL)
+    page.fill('input[name="password"]', TEST_PASSWORD)
+    page.click('button[type="submit"]')
+    page.wait_for_load_state("networkidle")
+    assert "/login" not in page.url
+    yield page
+    ctx.close()
+
+class TestStoryUI:
+    def test_01_page_loads(self, ui_page: Page):
+        """頁面正常載入"""
+        ui_page.goto(f"{BASE_URL}/your-url", timeout=GOTO_TIMEOUT)
+        ui_page.wait_for_load_state("networkidle")
+        ui_page.screenshot(path="/tmp/s{id}_01_page.png")
+        # 驗證關鍵元素
+        expect(ui_page.locator("[data-key-element]")).to_be_visible()
+```
+
+> ⚠️ **登入帳號**：`test_e2e@example.com` / `password`（來自 `src/tests/conftest.py`）  
+> ⚠️ **取得 chart URL**：參考 `src/tests/AiChatTest.py` 的 `_get_chart_url()` 模式  
+> ⚠️ **`scope="module"`**：UI 驗證腳本用 module scope，整個模組共用一個登入 session
+
+#### 8.3 驗證重點
+
 - 按鈕是否顯示在正確位置
 - 樣式是否與頁面風格一致
-- `data-testid` 屬性是否存在
+- `data-*` 屬性是否存在（依 page spec 的 🧪 規範）
 - 頁面是否正常載入（無 500 錯誤）
-- RWD：手機寬度（375px）下是否正常顯示
+- Alpine.js 互動：`x-show` 切換、disabled 狀態等
 
-截圖確認正常後，再告知使用者驗證結果。
+#### 8.4 截圖確認
+
+截圖存於 `/tmp/` 目錄，逐一檢查後告知使用者結果。**找到問題必須修正後再截圖確認，直到滿意才可進入下一步。**
 
 **停止並等待使用者最終確認。**
 
