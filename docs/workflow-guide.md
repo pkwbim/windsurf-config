@@ -14,6 +14,7 @@
 | `/build-laravel-contract` | Form Contract 設計（FormRequest + Controller 骨架） | UI 完成後，定義驗證規則和 Controller 行為 |
 | `/build-laravel-backend` | Backend TDD 實作（Controller 邏輯 + Feature Test） | Contract 完成後，TDD 實作真實邏輯 |
 | `/integration-e2e` | Playwright E2E 整合測試（通用，支援 Laravel + FastAPI+Vue） | Backend 完成後，依 e2e-scenarios.md 執行 E2E 測試 |
+| `/build-cli` | CLI/腳本開發（Makefile + Shell/Python + SSH） | 純命令列功能（無 Web UI/API）的開發 |
 | `/integration` | 整合測試（FastAPI+Vue 舊版） | FastAPI+Vue 專案的整合測試 |
 | `/init` | 引導流程入口 | **第一次使用時從這裡開始** |
 | `/setup-project-info` | 建立非技術目錄 | 新專案初始化 |
@@ -223,6 +224,50 @@ app/Http/
 **不適用場景**：
 - 純 API 專案（FastAPI/Node.js）→ 使用 `/build-backend`
 - 尚未完成 Form Contract → 先執行 `/build-laravel-contract`
+
+---
+
+### `/build-cli` - CLI/腳本開發（Makefile + Shell/Python + SSH）
+
+**用途**：開發 CLI 工具和自動化腳本，包含 Makefile 指令、Shell/Python 腳本、SSH 遠端操作、設定檔模板。適用於無 Web UI、無 API 端點、無 DB Migration 的純命令列功能。
+
+**前置條件**：
+- 已在 feature 分支
+- `pm/planning/02_active.md` 有 `active_story`
+- story 目錄下有 `spec.md`（CLI/腳本型模板）
+
+**目錄結構**：
+```
+src/scripts/
+├── {main_script}.sh      # 主腳本
+├── {helper_script}.sh    # 輔助腳本
+└── lib/
+    ├── common.sh          # 共用函式（log、顏色、錯誤處理）
+    ├── validation.sh      # 輸入驗證
+    └── {module}.sh        # 功能模組
+src/templates/
+└── *.tpl                  # 設定檔模板
+```
+
+**流程**：
+1. 確認前置條件（git branch、active story）
+2. 閱讀全部規格文件（spec、use-cases、business-rules）
+3. 建立共用函式庫（`lib/common.sh`、`lib/validation.sh`）
+4. 建立設定檔模板（`src/templates/`）
+5. 逐一實作功能模組（`lib/*.sh`）
+6. 實作主腳本（組合模組）
+7. 實作輔助腳本
+8. 更新 Makefile targets
+9. 功能驗證測試（依 e2e-scenarios.md）
+10. 更新 checklist.md
+11. 通知使用者驗證，等待確認
+12. 確認通過後 commit，提示下一步
+
+**下一步**：`/commit`（提交）或 `/integration-e2e`（E2E 測試）
+
+**不適用場景**：
+- Web App 開發 → 使用 `/build-laravel` 或 `/build`
+- 有前端 UI → 使用 `/build-laravel-ui` 或 `/build-ui`
 
 ---
 
