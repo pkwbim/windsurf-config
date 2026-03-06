@@ -91,105 +91,13 @@ pytest
 - The test MUST fail first to prove it checks the right thing
 
 ### 4. Implement Logic
-Write minimal code to make the test pass:
+Write minimal code to make the test pass.
 
-**⚠️ Code File Size Limit:**
-- **每個程式檔案必須在 200 行內**
-- 若超過 200 行，必須拆分為多個模組或類別
-- 拆分原則：
-  - 按功能職責拆分（Single Responsibility Principle）
-  - 提取共用邏輯到獨立模組
-  - 大型組件拆分為子組件
-  - 服務層拆分為多個專門服務
+**⚠️ 每個程式檔案必須在 200 行內**，超過則拆分。
 
-**Frontend (Vue):**
-- **使用 Composition API + Composables 模式（函數式組合）**
-- Follow Vue 3 Composition API patterns
-- Use `<script setup>` syntax for components
-- Implement reactive data with `ref` and `reactive`
-- Use Pinia for state management if needed
+**Frontend (Vue)**：遵循 `vue3-development` skill 的開發原則。
 
-**Frontend 開發原則（Functional Composition）：**
-- **組合優於繼承**：使用 composables 組合功能，而非類別繼承
-- **關注點分離**：UI 組件 vs 業務邏輯 vs 狀態管理
-- **可重用性**：提取共用邏輯到 composables
-- **單一職責**：每個 composable 只負責一個功能領域
-- **響應式設計**：善用 Vue 的響應式系統（ref, reactive, computed, watch）
-
-**分層架構：**
-```
-frontend/src/
-├── components/        # UI 組件（純展示邏輯）
-├── composables/       # 可重用的組合式函數（業務邏輯）
-├── services/          # API 呼叫和外部服務
-├── stores/            # Pinia 狀態管理
-└── views/             # 頁面組件（組合多個組件）
-```
-
-**範例結構：**
-```javascript
-// composables/useFeature.js
-export function useFeature() {
-  const data = ref([])
-  const loading = ref(false)
-  
-  async function fetchData() {
-    loading.value = true
-    // 業務邏輯
-    loading.value = false
-  }
-  
-  return { data, loading, fetchData }
-}
-
-// Component.vue
-<script setup>
-import { useFeature } from '@/composables/useFeature'
-const { data, loading, fetchData } = useFeature()
-</script>
-```
-
-- **檔案超過 200 行時**：
-  - 拆分為子組件（`components/Feature/SubComponent.vue`）
-  - 提取 composables（`composables/useFeature.js`）
-  - 分離業務邏輯到 services（`services/featureService.js`）
-  - 拆分複雜狀態到 stores（`stores/featureStore.js`）
-
-**Backend (FastAPI):**
-- **必須使用 OOP（物件導向程式設計）思維建構程式**
-- Follow FastAPI best practices with async/await
-- Use Pydantic models for request/response validation
-- Implement dependency injection for services
-- Use SQLAlchemy async sessions for database operations
-
-**OOP 開發原則：**
-- **封裝（Encapsulation）**：將業務邏輯封裝在類別中，避免純函數式程式設計
-- **單一職責（Single Responsibility）**：每個類別只負責一個功能領域
-- **依賴注入（Dependency Injection）**：使用 FastAPI 的依賴注入系統
-- **介面定義（Protocol/ABC）**：定義清晰的介面契約
-- **繼承與多型（Inheritance & Polymorphism）**：適當使用繼承和多型特性
-
-**範例結構：**
-```python
-# services/feature_service.py
-class FeatureService:
-    def __init__(self, db: AsyncSession):
-        self.db = db
-    
-    async def create_feature(self, data: FeatureCreate) -> Feature:
-        # 業務邏輯封裝在方法中
-        pass
-    
-    async def get_feature(self, id: int) -> Feature:
-        pass
-```
-
-- **檔案超過 200 行時**：
-  - 拆分 API 路由到多個檔案（`api/feature_routes.py`）
-  - 分離服務邏輯到多個類別（`services/feature_service.py`）
-  - 提取工具類別（`utils/feature_utils.py`）
-  - 拆分資料模型（`models/feature_models.py`）
-  - 定義 Protocol 介面（`services/protocols.py`）
+**Backend (FastAPI)**：遵循 `fastapi-development` skill 的開發原則。
 
 ### 5. Verify Test Success (TDD - Green)
 // turbo
@@ -286,42 +194,8 @@ pytest
 - Always follow TDD: Red → Green → Refactor
 - Keep implementation minimal and focused
 - **文件更新在 `/review` 階段處理**
- 
-## Tech Stack Specifics
- 
-### Frontend (Vue 3 + Vite)
-- Test runner: Vitest
-- Test utilities: Vue Test Utils
-- Test environment: happy-dom
-- Component testing: Use mount from Vue Test Utils
-- API testing: Mock API calls with vi.mock
-- **API Contract testing: `ApiContract.spec.js` 確保前後端資料格式一致**
-- **Router Config testing: `RouterConfig.spec.js` 確保所有路由都正確配置，避免 404**
-- **Router Links testing: `RouterLinks.spec.js` 確保組件內的 router-link 引用有效路由**
 
-### 路由測試注意事項
-當功能涉及新的 URL 路徑時，**必須**同時：
-1. 在 `router/index.js` 新增路由配置
-2. 在 `RouterConfig.spec.js` 新增對應測試
-3. 測試應驗證：
-   - 路由是否存在（不會 404）
-   - 路由參數是否正確解析
-   - 路由名稱是否正確
-
-```javascript
-// 路由配置測試範例
-it('should have route for /admin/brands/:slug/:tab', async () => {
-  const resolved = router.resolve('/admin/brands/wangsteak/tone')
-  expect(resolved.matched.length).toBeGreaterThan(0)
-  expect(resolved.name).toBe('admin-brand-panel-tab')
-  expect(resolved.params.slug).toBe('wangsteak')
-  expect(resolved.params.tab).toBe('tone')
-})
-```
-
-### Backend (FastAPI + Python)
-- Test runner: pytest
-- Async testing: pytest-asyncio (configured)
-- Test client: httpx.AsyncClient
-- Database testing: Use pytest fixtures for test DB
-- Coverage: pytest-cov (configured)
+## Skills 引用
+- **Frontend**：`vue3-development` skill（Vue 3 開發原則、分層架構、測試慣例）
+- **Backend**：`fastapi-development` skill（FastAPI 開發原則、OOP 架構、測試慣例）
+- **UI 設計**：`frontend-design` skill + `ui-ux-pro-max` skill（當涉及 UI 開發時啟用）
