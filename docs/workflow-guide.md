@@ -14,6 +14,7 @@
 | `/build-laravel-contract` | Form Contract 設計（FormRequest + Controller 骨架） | UI 完成後，定義驗證規則和 Controller 行為 |
 | `/build-laravel-backend` | Backend TDD 實作（Controller 邏輯 + Feature Test） | Contract 完成後，TDD 實作真實邏輯 |
 | `/integration-e2e` | Playwright E2E 整合測試（通用，支援 Laravel + FastAPI+Vue） | Backend 完成後，依 e2e-scenarios.md 執行 E2E 測試 |
+| `/build-wp-theme` | WordPress 主題開發（PHP/CSS/JS + Docker） | WordPress 自訂主題的 Customizer、CSS、模板開發 |
 | `/build-cli` | CLI/腳本開發（Makefile + Python + SSH） | 純命令列功能（無 Web UI/API）的開發 |
 | `/integration` | 整合測試（FastAPI+Vue 舊版） | FastAPI+Vue 專案的整合測試 |
 | `/init` | 引導流程入口 | **第一次使用時從這裡開始** |
@@ -224,6 +225,56 @@ app/Http/
 **不適用場景**：
 - 純 API 專案（FastAPI/Node.js）→ 使用 `/build-backend`
 - 尚未完成 Form Contract → 先執行 `/build-laravel-contract`
+
+---
+
+### `/build-wp-theme` - WordPress 主題開發（PHP/CSS/JS + Docker）
+
+**用途**：開發和修改 WordPress 自訂主題（Quanhox 或其他），包含 Customizer 設定、CSS 樣式、JS 互動、模板檔案。
+
+**前置條件**：
+- 已在 feature 分支
+- `pm/planning/02_active.md` 有 `active_story`
+- story 目錄下有 `spec.md`
+- Docker 環境可用（`make dev-up`）
+
+**目錄結構**：
+```
+src/themes/quanhox/
+├── style.css               # 主題宣告
+├── functions.php           # 功能載入 + body_class
+├── inc/
+│   ├── customizer.php      # Customizer 設定註冊
+│   ├── helpers.php         # CSS Variables 輸出
+│   ├── enqueue.php         # CSS/JS 載入
+│   └── theme-support.php   # Theme support 宣告
+├── assets/
+│   ├── css/main.css        # 主樣式（CSS Variables 驅動）
+│   └── js/customizer.js    # Customizer 即時預覽
+├── header.php, footer.php  # 模板檔案
+└── theme.json              # 全域設定
+```
+
+**流程**：
+1. 確認前置條件（git branch、active story、Docker）
+2. 設計系統產生（若需要，用 `ui-ux-pro-max` + `frontend-design` skill）
+3. 啟動 Docker 測試環境（`make dev-up`）
+4. 實作 Customizer 設定（`inc/customizer.php`）
+5. 實作 CSS Variables 輸出（`inc/helpers.php`）
+6. 實作 Body Class 與 Meta Tags（`functions.php`、`header.php`）
+7. 實作主樣式表（`assets/css/main.css`）
+8. 實作即時預覽 JS（`assets/js/customizer.js`）
+9. 更新 `theme.json`
+10. Docker 環境測試（依 e2e-scenarios.md）
+11. 更新 checklist.md
+12. 通知使用者驗證，等待確認
+13. 確認通過後 commit，提示下一步
+
+**下一步**：`/commit`（提交）→ `make install-theme`（部署到 production）
+
+**不適用場景**：
+- CLI 腳本開發 → 使用 `/build-cli`
+- Laravel 介面開發 → 使用 `/build-laravel`
 
 ---
 
