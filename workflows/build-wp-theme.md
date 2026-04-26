@@ -68,17 +68,46 @@ cat pm/planning/$STORY_DIR/spec.md
 
 ### 2. 設計系統產生（若需要）
 
-如果 Story 涉及視覺設計（色盤、字體、排版），先用 skill 產生設計系統：
+**觸發條件（符合任一即啟動）：**
+- Story 涉及色盤、字體、排版、佈局等視覺設計
+- 新增頁面模板或全新 UI 區塊
+- Story 描述中有「風格」「樣式」「美觀」「排版」等關鍵字
+- 不確定時：啟動（寧可多做設計思考，不要寫出 AI slop）
 
-```
-使用 ui-ux-pro-max skill：
-python3 skills/ui-ux-pro-max/scripts/search.py "<產業關鍵字>" --design-system -p "<主題名稱>"
+**不需要啟動：** 純 Customizer 欄位新增（無視覺變化）、bug 修正、邏輯修改
+
+#### Step 2a：用 `ui-ux-pro-max` skill 產生設計系統
+
+```bash
+# 產生完整設計系統（色盤、字體、風格、效果）
+python3 skills/ui-ux-pro-max/scripts/search.py "<產業關鍵字> <風格關鍵字>" --design-system -p "<主題名稱>"
+
+# 保存設計系統供後續 session 使用（推薦）
+python3 skills/ui-ux-pro-max/scripts/search.py "<產業關鍵字>" --design-system --persist -p "<主題名稱>"
+
+# 補充搜尋（需要更多選項時）
+python3 skills/ui-ux-pro-max/scripts/search.py "<關鍵字>" --domain style -n 5
+python3 skills/ui-ux-pro-max/scripts/search.py "<關鍵字>" --domain typography -n 5
 ```
 
-```
-使用 frontend-design skill：
-根據設計系統產出，決定具體的 CSS 實作方向
-```
+產出物：配色方案、字體配對、UI 風格推薦、需避免的反模式。
+
+#### Step 2b：用 `frontend-design` skill 決定美學方向
+
+在寫任何 CSS 之前，依 `frontend-design` skill 的 Design Thinking 流程思考：
+
+1. **Purpose**：這個主題/排版解決什麼問題？誰在用？
+2. **Tone**：選擇明確的美學方向（不可模糊）：
+   - 例：editorial/magazine、luxury/refined、soft/pastel、brutalist/raw
+3. **Differentiation**：什麼讓這個設計令人難忘？
+4. **Anti-patterns**：絕不使用 Inter/Roboto/Arial、紫色漸層白背景、千篇一律的卡片圓角
+
+**將設計決策記錄在 `spec.md` 或 `design-system/MASTER.md`，包含：**
+- 選定的美學方向（一句話）
+- 字體配對（Display + Body）
+- 主色 / 強調色 / 背景色
+- 間距與圓角策略
+- 動效策略（hover、transition、scroll-triggered）
 
 **設計系統確認後，更新 `spec.md` 的預設值。**
 
@@ -153,6 +182,14 @@ php -l src/themes/quanhox/header.php
 - Body class 選擇器：`body.qh-layout-boxed`、`body.qh-btn-default-rounded` 等
 - 響應式設計使用 media queries
 - 重點優化文章閱讀體驗和 CTA 按鈕
+
+**`frontend-design` 美學品質檢查（寫 CSS 時持續參考）：**
+- **Typography**：字體是否有特色？Display + Body 配對是否和諧？
+- **Color**：主色是否有存在感？強調色是否足夠醒目？避免平均分配色彩
+- **Spatial**：間距是否有呼吸感？是否有非對稱或意外的佈局？
+- **Motion**：hover 效果是否有驚喜？transition 是否流暢（200-300ms）？
+- **Backgrounds**：是否避免了純白/純灰的平淡背景？有沒有紋理/漸層/陰影增加層次？
+- **Anti-slop**：是否看起來像「AI 產生的」？如果是，重新設計
 
 ### 8. 實作即時預覽 JS（`assets/js/customizer.js`）
 
