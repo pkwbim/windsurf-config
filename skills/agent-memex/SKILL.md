@@ -1,161 +1,198 @@
 ---
 name: agent-memex
-description: "Interact with the agent-memex personal knowledge base API. Use when an agent needs to: store/retrieve/search knowledge cards, link cards bidirectionally, log a reasoning session for traceability, queue raw input for later processing, manage assets, or check knowledge-base health (lint, stats). Requires a Bearer token stored in the MEMEX_API_TOKEN environment variable."
+description: "Read, write, search, and link knowledge cards in the user's agent-memex personal knowledge base. Use when the agent needs to: answer a question grounded in the user's notes, capture a new insight as a card, queue raw input for later processing, log a reasoning trail, or check knowledge-base health. Requires a Bearer token in MEMEX_API_TOKEN."
 ---
 
 # agent-memex Skill
 
-agent-memex is a personal knowledge base API. The user grows the knowledge base over time; agents read existing cards to answer questions, write new cards to capture insights, and log their reasoning so the user can audit how an answer was reached.
-
-**Key entities**
-- **Card** — a Markdown note with `tags`, `sources` (URLs), and `[[Title]]` bidirectional links
-- **Session** — one reasoning run by an agent (query + trail of steps + final answer + cited cards)
-- **Raw** — unstructured input queued for later distillation into cards
-- **Asset** — uploaded binary files (images, PDFs)
+The user keeps personal knowledge as **cards** — Markdown notes with tags, sources, and `[[Title]]` links between them. As an agent, you read existing cards to answer questions and write new cards to capture lasting knowledge.
 
 ## Setup
 
 ```bash
-# Create a token once via the web UI at /tokens → 建立
-export MEMEX_API_TOKEN=memex_xxxx
-export MEMEX_BASE_URL=https://agent-memex.dev2.quanhox.com.tw   # prod
-# or http://localhost:8360 for local
+export MEMEX_BASE_URL=https://agent-memex.dev2.quanhox.com.tw
+export MEMEX_API_TOKEN=memex_xxxx   # create once at /tokens → 建立
 ```
 
-All requests:
+Every request:
 ```
 Authorization: Bearer $MEMEX_API_TOKEN
 Content-Type: application/json
 ```
 
----
+## Defaults (read these first)
 
-## Capability Map — When to Use What
+These rules cover almost every situation. Follow them unless you have a specific reason not to.
 
-| Need | Endpoint | Why |
-|------|----------|-----|
-| Find existing knowledge before answering | `GET /api/search?q=` (default mode=hybrid) | Avoid duplicate cards; ground answers in existing notes — hybrid handles both keyword and semantic queries |
-| Read a specific card | `GET /api/cards/{id}` | Get full content + links |
-| See what a card connects to | `GET /api/cards/{id}/backlinks` | Discover related context the user has captured |
-| Capture new insight | `POST /api/cards` | Add to knowledge base |
-| Update existing knowledge | `PATCH /api/cards/{id}` | Refine without losing history (auto-versioned) |
-| See historical versions | `GET /api/cards/{id}/versions` | Review how the user thought about something over time |
-| Restore a previous version | `POST /api/cards/{id}/restore` | Recover from a bad edit |
-| Log how an answer was derived | Sessions API (see below) | Auditability + future debugging |
-| Save raw input for later | `POST /api/raw` | Capture before processing (e.g., user pastes article) |
-| Upload a file | `POST /api/assets` | Store images/PDFs referenced by cards |
-| Check knowledge-base health | `GET /api/maintenance/lint` | Find cards needing attention (oversized, orphan, no tags) |
-| Get statistics | `GET /api/maintenance/detailed-stats` | Tag distribution, growth, card health |
+1. **Search first, always.** Before writing or answering, `GET /api/search?q=<keywords>`. Default mode is `hybrid` — it handles keywords, semantics, AND literal strings (ID numbers, passwords, serials). **Don't pass `mode=` unless you specifically need only one engine.**
+2. **One Session per user query.** Open a session at the start of any non-trivial query, log key steps, and close it with the final answer + cited card IDs. Skip it only for pure CRUD (e.g., "save this note").
+3. **Title matters.** Title is weighted higher than content in search ranking. Pick titles a future you would search for.
+4. **Use `[[Title]]` links liberally.** Links are bidirectional and auto-resolved. They turn a flat note pile into a graph.
+5. **Tags lowercase + hyphenated.** `machine-learning`, `family`, `quick-note`. No spaces, no caps.
+6. **Cards under 800 words.** Lint flags `oversized` over that. If a topic gets long, split into linked cards.
 
 ---
 
-## Session — Why and How
+## Common Workflows
 
-**Purpose**: A Session is the agent's reasoning blackbox recorder for one query. It has three uses:
-1. **Auditability** — the user can later inspect what cards the agent read and how it reasoned
-2. **Citation tracking** — `cited_card_ids` ties an answer to specific cards; if those cards change, related sessions are flagged
-3. **Activity history** — the Sessions UI shows past queries
-
-**When to open a Session**: whenever an agent is answering a non-trivial query against the knowledge base. Skip for one-off CRUD (e.g., the user pastes a note → just create a card).
-
-**Lifecycle**:
-```bash
-# 1. Open
-POST /api/sessions  {"query": "What did I learn about transformers?"}
-# → {id: "sess-uuid", ...}
-
-# 2. Log each step (step_type: "thought" | "search" | "read" | "write")
-POST /api/sessions/{id}/trail  {"step_type": "search", "content": "Searched 'transformer'; got 3 hits"}
-POST /api/sessions/{id}/trail  {"step_type": "read",   "content": "Read card abc-123 'Attention Is All You Need'"}
-POST /api/sessions/{id}/trail  {"step_type": "thought","content": "Self-attention is the core innovation..."}
-
-# 3. Close
-POST /api/sessions/{id}/complete
-{"final_answer": "...", "cited_card_ids": ["abc-123", "def-456"]}
+### A. Answer a question from the knowledge base
+```
+1. POST /api/sessions               {"query": "<user's question>"}              → save sess_id
+2. GET  /api/search?q=<keywords>                                                  → top 3-5 hits
+3. GET  /api/cards/{id}             (for each promising hit)                      → full content
+4. POST /api/sessions/{sess_id}/trail   {"step_type": "thought", "content": "…"} → log reasoning
+5. POST /api/sessions/{sess_id}/complete {"final_answer": "…", "cited_card_ids": [...]}
 ```
 
+### B. Capture a new insight as a card
+```
+1. GET  /api/search?q=<topic>      → make sure no duplicate exists
+2. POST /api/cards
+   {
+     "title": "Clear, searchable title",
+     "content": "## Markdown content\n\nSee also: [[Related Card]]",
+     "tags": ["topic-a", "topic-b"],
+     "sources": ["https://..."]    // optional
+   }
+```
+The card is **automatically embedded** for vector search — no extra step needed.
+
+### C. Update an existing card (creates a new version automatically)
+```
+PATCH /api/cards/{id}
+{
+  "content": "Full new content",
+  "tags": ["..."],
+  "mode": "replace"        // or "append" to add new content + merge tags
+}
+```
+The previous content is saved as a version; you can view via `GET /api/cards/{id}/versions` and restore via `POST /api/cards/{id}/restore {"version_number": N}`.
+
+### D. Save raw input to process later
+```
+POST /api/raw
+{"text": "...", "source": "https://...", "meta": {"origin": "..."}}
+```
+Use this when the user pastes something you can't immediately distill into a structured card. Later, when you turn it into a card:
+```
+POST /api/raw/{raw_id}/processed   {"card_id": "<new card id>"}
+```
+
+### E. Maintain the knowledge base
+```
+GET /api/maintenance/lint           → punch list of cards needing fixes
+GET /api/maintenance/detailed-stats → tag distribution, top-connected cards, growth
+```
+Common follow-ups:
+- `orphan` warnings → add a `[[Link]]` from a related card to this one
+- `no_tags` warnings → add 1–3 tags
+- `oversized` errors → split into linked cards
+
 ---
 
-## Card Writing Guidelines
+## Card Structure
 
-- **Markdown** with GFM extensions (tables, task lists, strikethrough OK)
-- **`[[Other Card Title]]`** = link to another card (bidirectional, auto-resolved)
-- **`tags`** lowercase, hyphenated (`machine-learning`, `quick-note`)
-- **`sources`** = array of URLs the card is derived from
-- **Search before creating** — duplicates pollute the knowledge base
-- **Keep cards focused**: lint flags `word_count > 800` as oversized; prefer splitting
+```markdown
+---
+type: person
+status: active
+related: [[Other Card]]
+---
+
+## Section heading
+
+Body content with **markdown**, [links](https://...), `code`,
+GFM tables, task lists, `[[wiki links]]` to other cards.
+```
+
+- **YAML front matter** between `---` lines is optional. Use it for structured metadata (status, type, dates, etc.). It is parsed and shown separately in the UI sidebar; it is NOT rendered into the body.
+- **GFM extensions** work: tables, task lists (`- [ ] todo`), strikethrough (`~~text~~`), fenced code blocks.
+- **`[[Title]]`** auto-resolves to a card link. If no card with that title exists, it becomes a search link.
 
 ---
 
-## Lint — Knowledge Base Health Check
+## Sessions — When and Why
 
-`GET /api/maintenance/lint` returns issues for the agent or user to address:
+A Session is the agent's reasoning record for one user query.
 
+- **Auditability** — the user can later see what cards you read and how you reasoned
+- **Citation tracking** — `cited_card_ids` ties an answer to its sources
+- **Activity history** — visible in the Sessions UI
+
+**Step types** (`step_type` in trail): `thought`, `search`, `read`, `write`. Use them honestly — they describe what you actually did.
+
+**Open a session if** the work involves searching/reading/reasoning across cards.
+**Skip a session if** the user just said "save this" or "delete that".
+
+---
+
+## Search — One Mode for Everything
+
+```
+GET /api/search?q=<query>
+```
+The default mode is `hybrid` (Reciprocal Rank Fusion of keyword + semantic + substring). It handles:
+- **Conceptual queries** — "transformer architecture", "焦慮"
+- **Keyword queries** — "Python decorator"
+- **Literal substrings** — ID numbers, phone numbers, passwords, serial codes (caught by ILIKE fallback)
+
+Response:
 ```json
 {
-  "last_run": "2026-05-04T...",
-  "summary": {"errors": 1, "warnings": 5, "info": 0, "total_checked": 6},
+  "query": "...", "mode": "hybrid",
   "results": [
-    {"type": "error",   "card_id": "...", "card_title": "...", "rule": "oversized", "word_count": 1200, "message": "卡片超過 800 字，建議拆分"},
-    {"type": "warning", "card_id": "...", "card_title": "...", "rule": "orphan",    "message": "沒有任何連結或反向連結"},
-    {"type": "warning", "card_id": "...", "card_title": "...", "rule": "no_tags",   "message": "沒有 tags"}
+    {"id": "...", "title": "...", "tags": [...], "excerpt": "...",
+     "score": 0.0328, "source": "both"}
   ]
 }
 ```
+`source` = `"both"` (matched by both engines — strongest signal), `"vector"`, or `"fts"`.
 
-**Use cases**:
-- After a writing session, check if newly created cards have orphan/no_tags warnings → fix them
-- User asks "what should I clean up?" → lint gives a punch list
-- Periodic maintenance: link orphan cards to related ones, split oversized cards
+Switch to `mode=fts` or `mode=vector` only if you have a clear reason. **For agents, always start with the default.**
 
 ---
 
-## Quick Reference — All Endpoints
+## API Quick Reference
 
 ### Search
 ```
-GET /api/search?q=<keywords>&mode=<hybrid|fts|vector>
-# Default mode is "hybrid" — combines FTS + vector via Reciprocal Rank Fusion.
-# Returns: {query, mode, results: [{id, title, tags, excerpt, score, source}]}
-#   source = "fts" | "vector" | "both" (only "both" appears in hybrid mode)
-# Always prefer the default hybrid unless you specifically need one engine.
+GET  /api/search?q=<keywords>[&mode=hybrid|fts|vector]
 ```
 
 ### Cards
 ```
-GET    /api/cards?tag=&sort=&limit=&offset=
-POST   /api/cards
-GET    /api/cards/{id}
-PATCH  /api/cards/{id}
+GET    /api/cards?tags=<tag>&page=N      # list (paginated, returns {items, total, page})
+POST   /api/cards                        # create — auto-embeds
+GET    /api/cards/{id}                   # full content + links + backlinks
+PATCH  /api/cards/{id}                   # partial update — auto-versions + re-embeds
 DELETE /api/cards/{id}
 GET    /api/cards/{id}/backlinks
 GET    /api/cards/{id}/versions
-GET    /api/cards/{id}/versions/{version_number}
-POST   /api/cards/{id}/restore
+GET    /api/cards/{id}/versions/{n}
+POST   /api/cards/{id}/restore           # body: {version_number}
 ```
 
 ### Sessions
 ```
-GET  /api/sessions?page=
-POST /api/sessions
+GET  /api/sessions?page=N                # {items, total, page}
+POST /api/sessions                       # body: {query}
 GET  /api/sessions/{id}
-POST /api/sessions/{id}/trail
-POST /api/sessions/{id}/complete
+POST /api/sessions/{id}/trail            # body: {step_type, content}
+POST /api/sessions/{id}/complete         # body: {final_answer, cited_card_ids}
 ```
 
 ### Raw
 ```
-GET    /api/raw?status=&page=
-POST   /api/raw
+GET    /api/raw?status=pending&page=N
+POST   /api/raw                          # body: {text, source?, meta?}
 GET    /api/raw/{id}
 DELETE /api/raw/{id}
-POST   /api/raw/{id}/processed   # body: {card_id}
+POST   /api/raw/{id}/processed           # body: {card_id}
 ```
 
 ### Assets
 ```
-GET    /api/assets?page=
-POST   /api/assets               # multipart, field: file
+POST   /api/assets                       # multipart, field: file
 GET    /api/assets/{id}
 GET    /api/assets/{id}/download
 DELETE /api/assets/{id}
@@ -164,27 +201,38 @@ DELETE /api/assets/{id}
 ### Maintenance
 ```
 GET  /api/maintenance/stats              # dashboard summary
-GET  /api/maintenance/detailed-stats     # full stats (growth, top tags, health)
+GET  /api/maintenance/detailed-stats     # full stats
 GET  /api/maintenance/lint               # latest lint report
-POST /api/maintenance/lint/run           # trigger fresh lint scan
-GET  /api/maintenance/reindex            # reindex status (stub)
-POST /api/maintenance/reindex/run        # trigger reindex (stub)
+POST /api/maintenance/lint/run           # fresh lint scan
+POST /api/maintenance/reindex/run        # backfill embeddings (e.g., after model change)
 ```
 
 ### Auth
 ```
-POST   /api/auth/login         # {email, password, token_name}
-POST   /api/auth/logout
-GET    /api/auth/tokens
-POST   /api/auth/tokens        # {name}
-DELETE /api/auth/tokens/{token_id}
+POST   /api/auth/tokens                  # body: {name} — create a new agent token
+GET    /api/auth/tokens                  # list (excludes web-ui tokens)
+DELETE /api/auth/tokens/{id}
 ```
 
 ### Health
 ```
-GET /api/health                # no auth required
+GET /api/health                          # no auth required
 ```
 
 ---
 
-For full request/response schemas and error codes, see [references/api_reference.md](references/api_reference.md).
+## Errors
+
+| Status | Meaning | What to do |
+|--------|---------|------------|
+| 401 | Token missing or invalid | Stop; ask the user to provide a token |
+| 403 | Token revoked or expired | Stop; ask the user to issue a new one |
+| 404 | Resource not found | Card/session may have been deleted |
+| 422 | Validation error | Check request body matches schema |
+| 5xx | Server error | Retry once; if it persists, surface to the user |
+
+Error body: `{"detail": "<message>"}`
+
+---
+
+For full request/response schemas, see [references/api_reference.md](references/api_reference.md).

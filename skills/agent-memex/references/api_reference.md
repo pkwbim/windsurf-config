@@ -41,18 +41,25 @@ Revoke a token immediately.
 ## Cards
 
 ### GET /api/cards
-Query params: `tag`, `sort` (`created`|`updated`|`title`), `limit` (default 20), `offset`
+Query params: `tags` (repeatable, e.g. `?tags=ai&tags=nlp`), `page` (default 1).
 ```json
 // Response 200
-[{"id": "uuid", "title": "...", "tags": [], "word_count": 120, "updated_at": "..."}]
+{
+  "items": [{"id": "uuid", "title": "...", "tags": [], "word_count": 120,
+             "oversized": false, "connections": 3,
+             "created_at": "...", "updated_at": "..."}],
+  "total": 42,
+  "page": 1
+}
 ```
 
 ### POST /api/cards
+`content` may begin with optional YAML front matter delimited by `---` lines; it will be parsed and shown separately as metadata in the UI sidebar (and stripped before rendering as HTML).
 ```json
 // Request
 {
   "title": "Attention Is All You Need",
-  "content": "## Summary\n\nThe Transformer model...\n\nSee also: [[Neural Networks]]",
+  "content": "---\ntype: paper\nstatus: read\n---\n\n## Summary\n\nThe Transformer model...\n\nSee also: [[Neural Networks]]",
   "tags": ["ai", "nlp", "paper"],
   "sources": ["https://arxiv.org/abs/1706.03762"]
 }
@@ -67,11 +74,14 @@ Query params: `tag`, `sort` (`created`|`updated`|`title`), `limit` (default 20),
 // Response 200
 {
   "id": "uuid", "title": "...", "content": "...", "tags": [...], "sources": [...],
-  "word_count": 45, "oversized": false,
-  "links": [{"id": "uuid2", "title": "Neural Networks"}],
+  "word_count": 45, "oversized": false, "connections": 2,
+  "links":     [{"id": "uuid2", "title": "Neural Networks"}],   // outgoing [[links]]
+  "backlinks": [{"id": "uuid3", "title": "Deep Learning"}],     // cards linking to this
   "created_at": "...", "updated_at": "..."
 }
 ```
+
+Note: card creation and updates automatically trigger embedding regeneration in the background.
 
 ### PATCH /api/cards/{id}
 All fields optional.
@@ -138,9 +148,13 @@ Cards that contain `[[This Card Title]]`.
 ```
 
 ### GET /api/sessions
-Query params: `page` (default 1)
+Query params: `page` (default 1).
 ```json
-[{"id": "uuid", "query": "...", "status": "completed", "created_at": "..."}]
+{
+  "items": [{"id": "uuid", "query": "...", "status": "completed", "created_at": "..."}],
+  "total": 12,
+  "page": 1
+}
 ```
 
 ---
@@ -161,7 +175,14 @@ Query params: `page` (default 1)
 ```
 
 ### GET /api/raw
-Query params: `status` (`pending`|`processed`|`skipped`), `page`
+Query params: `status` (`pending`|`processed`|`skipped`), `page` (default 1).
+```json
+{
+  "items": [{"id": "uuid", "text": "...", "status": "pending", "created_at": "..."}],
+  "total": 5,
+  "page": 1
+}
+```
 
 ### POST /api/raw/{id}/processed
 ```json
@@ -197,9 +218,9 @@ Returns the binary file (proxied).
 
 ### GET /api/search?q=...&mode=hybrid
 Three modes:
-- `hybrid` (default) — combines FTS + vector via Reciprocal Rank Fusion (RRF, k=60). Recommended for almost all queries.
-- `fts` — pg_jieba full-text only (title weighted A, content weighted B). Use when you want exact keyword matches.
-- `vector` — nomic-embed-text 768-dim cosine similarity only. Use for purely semantic queries.
+- `hybrid` (default) — combines FTS + ILIKE substring + vector via Reciprocal Rank Fusion (RRF, k=60). **Recommended for almost all queries** — covers conceptual, keyword, and literal-string (ID, password, serial) cases in one shot.
+- `fts` — pg_jieba full-text + ILIKE substring (title weighted A, content weighted B). Use when you want only text-based matching.
+- `vector` — nomic-embed-text 768-dim cosine similarity only. Use for purely semantic queries (no literal strings).
 
 ```json
 // Response 200
@@ -295,14 +316,18 @@ Returns the latest lint report. Each card is checked against three rules:
 ### POST /api/maintenance/lint/run
 Triggers a fresh scan. Same response shape as `GET /api/maintenance/lint`.
 
+### POST /api/maintenance/reindex/run
+Re-generates embeddings for all cards belonging to the authenticated user.
+Use after the embedding model changes, or to fix cards with missing/stale embeddings.
+```json
+{"status": "completed", "cards_processed": 16, "cards_updated": 16}
+```
+
 ### GET /api/maintenance/reindex
-Reindex status. Currently a stub (embedding feature in development).
+Returns reindex history (currently a stub returning idle state):
 ```json
 {"current_status": "idle", "last_run": null, "history": []}
 ```
-
-### POST /api/maintenance/reindex/run
-Queue a reindex (stub).
 
 ---
 
