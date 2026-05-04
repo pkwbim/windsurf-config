@@ -1,12 +1,13 @@
 # Assets
 
-Binary files (images, PDFs) attached to or referenced by cards.
+Binary files (images, PDFs, etc.) that can be uploaded and embedded in cards.
 
 ## Endpoints
 
 ```
 GET    /api/assets?page=N
-POST   /api/assets                        # multipart/form-data, field: file
+POST   /api/assets                        # multipart/form-data, fields: file, folder (optional)
+GET    /api/assets/names                  # {wiki-key: id} map for ![[]] resolution
 GET    /api/assets/{id}
 GET    /api/assets/{id}/download
 DELETE /api/assets/{id}
@@ -14,42 +15,88 @@ DELETE /api/assets/{id}
 
 ## Upload
 
-Multipart form, field name `file`:
+Multipart form, field name `file`. Optionally include `folder` (a logical label, not a filesystem path):
 
 ```bash
+# Root-level file
 curl -X POST $MEMEX_BASE_URL/api/assets \
   -H "Authorization: Bearer $MEMEX_API_TOKEN" \
-  -F "file=@/path/to/image.png"
+  -F "file=@/path/to/photo.png"
+
+# File inside a folder
+curl -X POST $MEMEX_BASE_URL/api/assets \
+  -H "Authorization: Bearer $MEMEX_API_TOKEN" \
+  -F "file=@/path/to/photo.png" \
+  -F "folder=images"
 ```
 
 Response:
 ```json
 {
   "id": "uuid",
-  "filename": "image.png",
+  "name": "photo.png",
+  "folder": "images",
   "mime_type": "image/png",
-  "size_bytes": 12345,
+  "size": 12345,
   "checksum": "sha256:...",
   "created_at": "..."
 }
 ```
+
+## Folders
+
+`folder` is a logical label (e.g. `images`, `documents`, `diagrams`). It is separate from how files are stored on disk — the server stores files under `YYYY/MM/uuid.ext` automatically.
+
+- Names within the same folder must be unique per user. The DB enforces `(user_id, folder, name)` uniqueness.
+- Root-level files (no folder) use `folder: ""`.
+
+## Embed in cards with `![[]]`
+
+Reference an asset using wiki syntax inside card content:
+
+```markdown
+![[photo.png]]              # root-level file — rendered as <img>
+![[images/photo.png]]       # file in the "images" folder — rendered as <img>
+![[documents/report.pdf]]   # non-image — rendered as a download link
+```
+
+- Image extensions (`jpg`, `jpeg`, `png`, `gif`, `webp`, `svg`, `bmp`, `avif`) → `<img>` tag
+- All other extensions → download link
+- Unresolved filename → rendered as inline code `` `![[...]]` `` (won't break the page)
+
+URLs are resolved server-side at render time using relative paths, so they work regardless of which domain the app is running on.
+
+## Name resolution map
+
+```
+GET /api/assets/names
+```
+Returns a flat `{wiki-key: id}` map used internally by the renderer:
+```json
+{
+  "photo.png": "uuid1",
+  "images/banner.png": "uuid2",
+  "documents/report.pdf": "uuid3"
+}
+```
+Key format: `folder/name` for files with a folder, `name` for root files.
 
 ## Download
 
 ```
 GET /api/assets/{id}/download
 ```
-Returns the raw binary file. The server proxies the file through (the underlying storage path is internal).
+Returns the raw binary file with the correct `Content-Type`.
 
 ## Delete
 
 ```
 DELETE /api/assets/{id}
 ```
-Returns 204. Deletes the asset record AND the underlying file on disk.
+Returns 204. Deletes both the DB record and the file on disk.
 
 ## Tips
 
-- Reference an asset from a card by including a Markdown link:
-  `![alt text]($MEMEX_BASE_URL/api/assets/<id>/download)`
-- Upload before referencing — the asset must exist before a card links to it.
+- Choose `folder` names that group files by type or topic: `images`, `diagrams`, `docs`, `screenshots`.
+- Upload before referencing — the asset must exist before a card can embed it.
+- The `folder` in the wiki key must match exactly, including case.
