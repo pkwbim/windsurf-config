@@ -23,9 +23,12 @@ https://tasq.dev2.quanhox.com.tw/api
 > 本機開發環境：`http://127.0.0.1:8344`
 
 ### 認證
-所有請求需帶 `X-API-Key` header：
+所有請求需帶 `X-API-Key` header。API Key 存放於 credential：
+
 ```
-X-API-Key: {你的 api_key}
+credential file: tasq-api.json
+field: credential
+header to use: X-API-Key
 ```
 
 ### Workspace
