@@ -19,6 +19,11 @@ Authorization: Bearer $MEMEX_API_TOKEN
 Content-Type: application/json
 ```
 
+Live API schema (full wire format, auto-generated):
+- OpenAPI JSON: `$MEMEX_BASE_URL/api/openapi.json`
+- Swagger UI:   `$MEMEX_BASE_URL/api/docs`
+- ReDoc:        `$MEMEX_BASE_URL/api/redoc`
+
 ## Defaults — follow unless you have a specific reason not to
 
 1. **Search first.** Before answering or writing, hit `/api/search` (default mode `hybrid` covers keywords + semantics + literal strings).
