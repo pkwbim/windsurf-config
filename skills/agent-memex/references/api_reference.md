@@ -1,6 +1,8 @@
 # agent-memex API Reference
 
-Base URL: `$MEMEX_BASE_URL` (e.g., `http://localhost:8360`)
+Base URL: `$MEMEX_BASE_URL`
+- Production: `https://agent-memex.dev2.quanhox.com.tw`
+- Local: `http://localhost:8360`
 Auth header: `Authorization: Bearer $MEMEX_API_TOKEN`
 
 ---
@@ -202,6 +204,84 @@ Full-text search across card titles and content.
   {"id": "uuid2", "title": "Attention Mechanism", "snippet": "...", "score": 0.82}
 ]
 ```
+
+---
+
+## Maintenance
+
+Use these to monitor knowledge-base health and statistics.
+
+### GET /api/maintenance/stats
+Lightweight dashboard summary.
+```json
+{
+  "total_cards": 42,
+  "total_assets": 5,
+  "active_sessions": 2,
+  "raw_pending": 0,
+  "embedding_healthy": true
+}
+```
+
+### GET /api/maintenance/detailed-stats
+Full statistics including growth trends, top tags, top connected cards, and card health distribution.
+```json
+{
+  "overview": {
+    "total_cards": 42, "total_raw": 0, "total_assets": 5,
+    "total_sessions": 2, "db_size_mb": 0, "last_reindex": null
+  },
+  "cards_growth": [{"date": "5/1", "count": 38}, {"date": "5/2", "count": 40}, ...],
+  "top_tags": [{"tag": "ai", "count": 12}, ...],
+  "top_connected": [{"id": "uuid", "title": "...", "connections": 8}, ...],
+  "card_health": {"oversized": 1, "orphan": 3, "no_tags": 2, "healthy": 36},
+  "file_types": [],
+  "disk_usage": {"assets_mb": 0, "db_mb": 0, "logs_mb": 0}
+}
+```
+
+### GET /api/maintenance/lint
+Returns the latest lint report. Each card is checked against three rules:
+- `oversized` (error) — `word_count > 800`, suggest splitting
+- `orphan` (warning) — no outgoing or incoming `[[links]]`
+- `no_tags` (warning) — empty tags array
+
+```json
+{
+  "last_run": "2026-05-04T07:30:00+00:00",
+  "status": "completed",
+  "summary": {"errors": 1, "warnings": 5, "info": 0, "total_checked": 6},
+  "results": [
+    {
+      "type": "error",
+      "card_id": "uuid",
+      "card_title": "Long Article",
+      "rule": "oversized",
+      "message": "卡片超過 800 字，建議拆分",
+      "word_count": 1200
+    },
+    {
+      "type": "warning",
+      "card_id": "uuid2",
+      "card_title": "Stranded Note",
+      "rule": "orphan",
+      "message": "沒有任何連結或反向連結"
+    }
+  ]
+}
+```
+
+### POST /api/maintenance/lint/run
+Triggers a fresh scan. Same response shape as `GET /api/maintenance/lint`.
+
+### GET /api/maintenance/reindex
+Reindex status. Currently a stub (embedding feature in development).
+```json
+{"current_status": "idle", "last_run": null, "history": []}
+```
+
+### POST /api/maintenance/reindex/run
+Queue a reindex (stub).
 
 ---
 
