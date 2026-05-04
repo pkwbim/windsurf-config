@@ -50,9 +50,18 @@ Response:
 - Names within the same folder must be unique per user. The DB enforces `(user_id, folder, name)` uniqueness.
 - Root-level files (no folder) use `folder: ""`.
 
-## Naming rule (important)
+## Naming rules (important)
 
-**The agent is responsible for choosing a filename that won't collide.** Uploading a file with the same `(folder, name)` as an existing asset returns **`409 Conflict`** — the API does not auto-rename and does not silently overwrite.
+**1. Filenames must not contain slashes (`/` or `\`).** Use the separate `folder` field to express directory structure. Sending `file=aaa/bbb.jpg` returns **`422`**:
+
+```json
+HTTP 422
+{"detail": "檔名不可包含斜線（/ 或 \\）：aaa/bbb.jpg。請改用 folder 欄位指定資料夾。"}
+```
+
+Correct way to upload `aaa/bbb.jpg`: `file=bbb.jpg` + `folder=aaa`. The wiki key for embedding will be `![[aaa/bbb.jpg]]`.
+
+**2. The agent is responsible for choosing a filename that won't collide.** Uploading a file with the same `(folder, name)` as an existing asset returns **`409 Conflict`** — the API does not auto-rename and does not silently overwrite.
 
 ```json
 HTTP 409
