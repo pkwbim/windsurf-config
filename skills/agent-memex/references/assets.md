@@ -55,14 +55,27 @@ Response:
 Reference an asset using wiki syntax inside card content:
 
 ```markdown
-![[photo.png]]              # root-level file — rendered as <img>
+![[photo.png]]              # root-level file (folder: "") — rendered as <img>
 ![[images/photo.png]]       # file in the "images" folder — rendered as <img>
 ![[documents/report.pdf]]   # non-image — rendered as a download link
 ```
 
-- Image extensions (`jpg`, `jpeg`, `png`, `gif`, `webp`, `svg`, `bmp`, `avif`) → `<img>` tag
-- All other extensions → download link
-- Unresolved filename → rendered as inline code `` `![[...]]` `` (won't break the page)
+**How to construct the wiki key after uploading:**
+
+Use the `name` and `folder` fields from the upload response:
+
+```
+folder == ""        →  ![[{name}]]
+folder == "images"  →  ![[images/{name}]]
+```
+
+Example: upload returns `{"name": "photo.png", "folder": "images"}` → write `![[images/photo.png]]` in the card.
+
+**Do not guess or hard-code the filename.** Always derive the key from the upload response or from `GET /api/assets/names`.
+
+- `mime_type` starting with `image/` → rendered as `<img>` (determined by DB value, not extension)
+- All other `mime_type` → rendered as a download link
+- Unresolved key → rendered as inline code `` `![[...]]` `` (won't break the page)
 
 URLs are resolved server-side at render time using relative paths, so they work regardless of which domain the app is running on.
 
