@@ -50,6 +50,7 @@ Body content here…
 - GFM extensions: tables, task lists (`- [ ] todo`), strikethrough (`~~text~~`), fenced code blocks
 - `[[Other Card Title]]` auto-resolves to a card link (or a search link if no card with that title exists)
 - Links between cards are bidirectional — backlinks are computed automatically
+- `![[filename.png]]` embeds an uploaded asset (image → `<img>`, other files → download link). Use `![[folder/filename.png]]` for assets stored in a folder. See [assets.md](assets.md) for upload and folder details.
 
 ## List
 
