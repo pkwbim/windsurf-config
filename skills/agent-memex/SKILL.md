@@ -38,6 +38,7 @@ Each guide is self-contained. Read just the one(s) for your current task.
 | Create / update / read / delete cards, link cards, use front matter | [references/cards.md](references/cards.md) |
 | Log a reasoning Session | [references/sessions.md](references/sessions.md) |
 | Save raw user input for later | [references/raw.md](references/raw.md) |
+| Read or set the user's "homepage" (root) card | [references/root.md](references/root.md) |
 | Upload / link binary files | [references/assets.md](references/assets.md) |
 | Lint, stats, reindex | [references/maintenance.md](references/maintenance.md) |
 | Manage API tokens | [references/auth.md](references/auth.md) |
