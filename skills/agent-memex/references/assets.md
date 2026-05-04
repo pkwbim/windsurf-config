@@ -50,6 +50,21 @@ Response:
 - Names within the same folder must be unique per user. The DB enforces `(user_id, folder, name)` uniqueness.
 - Root-level files (no folder) use `folder: ""`.
 
+## Naming rule (important)
+
+**The agent is responsible for choosing a filename that won't collide.** Uploading a file with the same `(folder, name)` as an existing asset returns **`409 Conflict`** — the API does not auto-rename and does not silently overwrite.
+
+```json
+HTTP 409
+{"detail": "檔名已存在：images/photo.png。請改名後重試，或先刪除舊的 asset。"}
+```
+
+When you hit a 409:
+- **If you intend to update the existing file** (same logical asset, new bytes): `DELETE /api/assets/{id}` first, then re-upload. (No PATCH endpoint for asset content.)
+- **If it's a different file that happens to have the same name**: pick a more specific name (e.g. `kgi-bank-form-2026-05.jpg` instead of `form.jpg`) or put it in a different `folder`.
+
+Do not retry blindly with the same name. Names should be descriptive enough that collisions are rare in practice.
+
 ## Embed in cards with `![[]]`
 
 Reference an asset using wiki syntax inside card content:
