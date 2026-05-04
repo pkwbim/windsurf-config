@@ -34,7 +34,7 @@ Content-Type: application/json
 
 | Need | Endpoint | Why |
 |------|----------|-----|
-| Find existing knowledge before answering | `GET /api/search?q=` | Avoid duplicate cards; ground answers in existing notes |
+| Find existing knowledge before answering | `GET /api/search?q=` (default mode=hybrid) | Avoid duplicate cards; ground answers in existing notes — hybrid handles both keyword and semantic queries |
 | Read a specific card | `GET /api/cards/{id}` | Get full content + links |
 | See what a card connects to | `GET /api/cards/{id}/backlinks` | Discover related context the user has captured |
 | Capture new insight | `POST /api/cards` | Add to knowledge base |
@@ -114,7 +114,11 @@ POST /api/sessions/{id}/complete
 
 ### Search
 ```
-GET /api/search?q=<keywords>
+GET /api/search?q=<keywords>&mode=<hybrid|fts|vector>
+# Default mode is "hybrid" — combines FTS + vector via Reciprocal Rank Fusion.
+# Returns: {query, mode, results: [{id, title, tags, excerpt, score, source}]}
+#   source = "fts" | "vector" | "both" (only "both" appears in hybrid mode)
+# Always prefer the default hybrid unless you specifically need one engine.
 ```
 
 ### Cards

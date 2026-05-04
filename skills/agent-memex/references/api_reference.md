@@ -195,15 +195,36 @@ Returns the binary file (proxied).
 
 ## Search
 
-### GET /api/search?q=...
-Full-text search across card titles and content.
+### GET /api/search?q=...&mode=hybrid
+Three modes:
+- `hybrid` (default) — combines FTS + vector via Reciprocal Rank Fusion (RRF, k=60). Recommended for almost all queries.
+- `fts` — pg_jieba full-text only (title weighted A, content weighted B). Use when you want exact keyword matches.
+- `vector` — nomic-embed-text 768-dim cosine similarity only. Use for purely semantic queries.
+
 ```json
 // Response 200
-[
-  {"id": "uuid", "title": "Transformer Architecture", "snippet": "...highlighted...", "score": 0.95},
-  {"id": "uuid2", "title": "Attention Mechanism", "snippet": "...", "score": 0.82}
-]
+{
+  "query": "transformer",
+  "mode": "hybrid",
+  "results": [
+    {
+      "id": "uuid",
+      "title": "Attention Is All You Need",
+      "tags": ["ai", "nlp"],
+      "excerpt": "...highlighted snippet...",
+      "score": 0.0328,
+      "source": "both"   // "fts" | "vector" | "both"
+    }
+  ]
+}
 ```
+
+**Score interpretation by mode:**
+- `hybrid`: RRF score (sum of 1/(60+rank) across engines); higher is better
+- `fts`: ts_rank value
+- `vector`: cosine similarity (0~1)
+
+The `source` field indicates which engine surfaced the result. In hybrid mode, `"both"` means both engines ranked it; this is the strongest signal.
 
 ---
 
