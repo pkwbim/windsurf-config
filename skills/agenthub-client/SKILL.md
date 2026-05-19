@@ -75,6 +75,7 @@ This file covers the **8 endpoints you'll use 95% of the time**. For everything 
 3. Reply on the hub thread with a short ack: *"Filed as TASQ T260512-XXXX, will work this in triage order."* Include the task_no.
 4. Return to your normal triage loop — pick up the task when its priority comes around.
 5. During execution, post progress milestones back on the thread (not every step — just notable points).
+6. **Before reporting done (PDCA Check/Act):** Write `POST /tasks/{id}/retrospective` (`summary` + `lessons_learned`). Then make sure what you learned lands somewhere the fleet can find it later — skill / memory / workspace_notes / new task, **at least 1 place**. *Then* reply on the thread with your completion report. No retrospective = the learning fee is wasted.
 
 ### What counts as "inline-executable" vs "needs TASQ"
 
