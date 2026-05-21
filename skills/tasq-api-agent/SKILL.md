@@ -72,3 +72,17 @@ https://tasq.dev2.quanhox.com.tw/api/docs
 2. GET /tasks?workspace=X                 → 列出所有任務
 3. GET /tasks/by-no/{task_no}?workspace=X → 以 task_no 取得詳情
 ```
+
+---
+
+## ⭐ 卡住時：waiting 還是 blocked？（Story 22）
+
+step / task 卡住時不要只設 `blocked` 了事——這兩態語義不同、後端處理不同：
+
+> **等一件預期會發生的事 → `waiting`（不告警）；碰到不該發生的錯 → `blocked`（會告警）。**
+
+- `waiting`：等問卷 / 等授權 / 等別的 task / 等外部配額 / 等時間。設 `waiting_on_type` + `waiting_reason`（+ `waiting_on_id` / `due_date`）。**設完 step waiting 後 task 保持 active，繼續推進其他無依賴的 step。**
+- `blocked`：程式拋例外、依賴掛了、外部一直回錯。設 `blocked_reason`（+ `error_class`）。會告警、不自動恢復。
+- **由 agent 自己 `PATCH /steps/{id}` 標，系統不自動判斷。**
+
+完整 enum 值、欄位與判斷範例見 `ref-fields-errors.md` 的「waiting vs blocked」一節。
