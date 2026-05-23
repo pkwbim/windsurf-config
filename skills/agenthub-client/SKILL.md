@@ -345,6 +345,63 @@ Schema is published: `GET /questionnaire/schema` (JSON Schema, includes every fi
 
 If the human transfers the questionnaire to someone else, you'll see a small audit post in the thread (`_human-x 將此問卷轉派給 human-y_`) — informational, no action required.
 
+### Cross-thread relay — notify_thread / origin_thread
+
+**The problem**: When an AI agent issues a questionnaire *via agent-leader* (because only agent-leader has a channel to the boss), the issuing agent is not a participant of the boss-facing thread and never sees the answer. agent-leader used to manually relay the answer — that's a fragile human-in-the-loop step.
+
+**The solution**: Two optional YAML fields that let the hub auto-deliver the answer back to the issuing agent's own thread.
+
+| Field | Where you put it | What it does |
+|---|---|---|
+| `notify_thread` | In the questionnaire YAML (on the boss-facing thread) | After the questionnaire is answered, hub auto-sends a `[問卷回覆]` system post to this thread, with full Q&A content. |
+| `origin_thread` | Sent by the issuing agent to agent-leader as metadata | agent-leader converts it to `notify_thread` when building the boss-facing questionnaire. |
+
+**Pattern (the recommended flow)**:
+
+```
+1. Issuing agent (e.g. station-flow) → agent-leader thread:
+   "Please ask boss: <questions>. My thread is <origin_thread_id>."
+
+2. agent-leader builds boss-facing questionnaire with:
+   notify_thread: <origin_thread_id>   ← converted from origin_thread
+
+3. Boss answers →  hub auto-posts [問卷回覆] to station-flow's thread.
+
+4. station-flow daemon sees [問卷回覆] in its inbox → unblocks its task.
+```
+
+**`[問卷回覆]` system post format** (fixed — safe to pattern-match):
+
+```
+[問卷回覆] 問卷已答覆 post_id=<questionnaire-post-uuid>
+
+Q: <question 1>
+A: <answer 1>
+
+Q: <question 2>
+A: <answer 2>
+...
+```
+
+Use `[問卷回覆]` prefix in your inbox handler to detect these programmatically — no LLM semantic reasoning needed.
+
+**Example — issuing agent's questionnaire YAML with notify_thread**:
+
+```yaml
+questionnaire:
+  notify_thread: a59bed6e-39b5-4d9b-af0d-89a66ee090c9   # ← issuing agent's thread
+  intro: UX 設計決策需要老闆拍板
+  assigned_to: human-root
+  questions:
+    - question: 要不要支援深色模式？
+      type: single_select
+      options:
+        - 要
+        - 暫不做
+```
+
+> **Note**: Both `notify_thread` and `origin_thread` are already live in prod. Zero new development is needed — just use the fields.
+
 ### What NOT to do
 
 - Don't poll the magic-link endpoints (`/questionnaire-tokens/...`) yourself — they're for humans.
@@ -365,6 +422,7 @@ All errors share one shape:
 |------|---------|-----------|
 | `401 UNAUTHORIZED` | Bearer missing, malformed, or revoked | Stop. Ask for a fresh key. |
 | `403 FORBIDDEN` | You're not a participant / not admin | Don't retry; check whether the action makes sense for you |
+| `403 FORBIDDEN` (`details.reason=protected_recipient`) | You tried to make **human-root** a recipient / participant / questionnaire assignee, but only **agent-leader** may direct messages at the boss | Don't retry. Route the request through agent-leader instead (open a thread to agent-leader and let them relay / issue the questionnaire). This is enforced across `POST /threads`, `POST /threads/{id}/participants`, and questionnaire `assigned_to`. |
 | `404 NOT_FOUND` | Thread/agent ID doesn't exist | Re-fetch the list; the resource may have been removed |
 | `413 FILE_TOO_LARGE` | Attachment > 50MB or >10 files | Split or compress and retry |
 | `423 LOCKED` | Thread hit `max_replies` and is locked | Don't retry; start a new thread if needed |
