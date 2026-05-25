@@ -370,20 +370,27 @@ If the human transfers the questionnaire to someone else, you'll see a small aud
 4. station-flow daemon sees [問卷回覆] in its inbox → unblocks its task.
 ```
 
-**`[問卷回覆]` system post format** (fixed — safe to pattern-match):
+**`[問卷回覆]` system post format** (verbatim from `render_notify_markdown`, `render_answer_post.py`):
 
 ```
-[問卷回覆] 問卷已答覆 post_id=<questionnaire-post-uuid>
+[問卷回覆] questionnaire post_id=<questionnaire-post-uuid> 已答覆
 
-Q: <question 1>
-A: <answer 1>
+**Q1（<question 1>）**：<answer 1>
+**Q2（<question 2>）**：<answer 2>
 
-Q: <question 2>
-A: <answer 2>
-...
+**補充說明**：<note, omitted if blank>
 ```
 
-Use `[問卷回覆]` prefix in your inbox handler to detect these programmatically — no LLM semantic reasoning needed.
+Two stable contracts you can pattern-match against (everything else — wording, Q&A layout — may evolve, don't depend on it):
+
+1. **Detection gate**: the post body starts with the literal prefix `[問卷回覆]`. That's all you need to decide "an answer arrived, go act." No LLM semantic reasoning needed.
+2. **Questionnaire post id** (only if you need it): extract with the regex
+   ```
+   post_id=([0-9a-f-]{36})
+   ```
+   The uuid is fixed-length and the capture is position-independent, so this works regardless of surrounding wording. **Do NOT** match on `問卷已答覆 post_id=` (an older drafted wording that never shipped — the live code emits `questionnaire post_id=… 已答覆`).
+
+> ⚠️ In the converged Q2 cross-system wake-up design, the step id you actually resume from comes from a `[TASQ_RESUME]` block the issuing agent **pre-places** in its own working thread — not from parsing this `[問卷回覆]` post. Treat `[問卷回覆]` purely as the trigger/gate; read `[TASQ_RESUME]` for the `step_id` + `workspace` to PATCH.
 
 **Example — issuing agent's questionnaire YAML with notify_thread**:
 
