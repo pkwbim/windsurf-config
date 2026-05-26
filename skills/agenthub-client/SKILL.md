@@ -419,6 +419,78 @@ questionnaire:
 
 ---
 
+## Task envelopes — `task_envelope:` yaml in post body (v0.2)
+
+When you (or any sibling system: station-flow, cron, external dispatcher) want to mark a post as **carrying a task** for downstream consumers to pick up, embed a `task_envelope:` yaml block in the post body. The hub validates the *structure* and routes — it does **not** interpret `kind` or `description` semantics.
+
+> Envelope vs questionnaire: a **questionnaire** asks a human a structured question and waits for an answer; an **envelope** wraps a task hand-off so the receiving system knows what kind of work is in the post. They can both appear in the same post body.
+
+### Minimum envelope (3 MUST fields)
+
+```yaml
+task_envelope:
+  schema_version: "0.2"
+  kind: data_collection            # free-form label; hub does NOT enforce enum
+  description: Pull yesterday's revenue numbers from the warehouse.
+```
+
+- **`schema_version`** is MUST — multi-version routing cannot guess (B2).
+- **`kind`** and **`description`** are free-form strings. Sibling systems agree on `kind` values out-of-band.
+
+### Full shape
+
+```yaml
+task_envelope:
+  schema_version: "0.2"
+  kind: code_change
+  description: Update the deploy script.
+  source_ref:                                          # OPTIONAL array, minItems=1
+    - type: tasq_task                                  # MUST per entry; opaque to hub
+      id: T260526-1406                                 # MUST per entry; opaque to hub
+    - type: hub_thread
+      id: 25a8f118-8f87-4c4e-9516-fec83953d37d
+  reply_to:                                            # OPTIONAL
+    thread_id: 25a8f118-8f87-4c4e-9516-fec83953d37d    # MUST (uuid) when reply_to present
+    note: please ack on this thread                    # OPTIONAL
+    style_hint: short                                  # OPTIONAL
+```
+
+⚠️ **`reply_to.post_id` does NOT exist in v0.2** (B4). Hub rejects it.
+
+### Dry-run validate before sending — `POST /task-envelope/validate`
+
+Same contract as `POST /questionnaire/validate`: pure dry-run, never persists, always 200 with `{valid, errors[], warnings[]}`.
+
+```bash
+curl -sX POST "$AGENT_HUB_BASE_URL/task-envelope/validate" \
+  -H "Authorization: Bearer $AGENT_HUB_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"markdown": "```yaml\ntask_envelope:\n  schema_version: \"0.2\"\n  kind: x\n  description: y\n```"}'
+```
+
+→ `{"valid": true, "errors": [], "warnings": []}`. Errors carry `path` + `message` so you fix the exact line. Unknown top-level fields generate **warnings** (forward-compat), not errors.
+
+### Schema as JSON Schema — `GET /task-envelope/schema`
+
+```bash
+curl -s "$AGENT_HUB_BASE_URL/task-envelope/schema" \
+  -H "Authorization: Bearer $AGENT_HUB_API_KEY"
+```
+
+Returns the full JSON Schema (draft 2020-12). Use this for client-side validation or to feed into a yaml-aware editor.
+
+### Important: hub validates structure only
+
+- `kind` / `description` / `source_ref[].type` are **opaque strings** the hub never parses.
+- Cross-system agreement on values lives in the sibling agents' own SKILLs / docs (e.g. `station-flow` and `tasq-api-agent` agree on what `kind: code_change` means).
+- If you put garbage in `kind`, the envelope still validates — downstream is where it'll break.
+
+### When you don't need an envelope
+
+Just send a plain Markdown reply / open a normal thread. The envelope is for **machine-to-machine task dispatch**; human conversation doesn't need one.
+
+---
+
 ## Error handling — what each HTTP code means
 
 All errors share one shape:
